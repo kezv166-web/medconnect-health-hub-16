@@ -148,13 +148,20 @@ const UpdateProfileForm = () => {
 
       if (profileError) throw profileError;
 
-      // Delete existing medicines and insert new ones
+      // Delete existing medicines and schedules
       const { error: deleteError } = await supabase
         .from('medicines')
         .delete()
         .eq('patient_id', profileId);
 
       if (deleteError) throw deleteError;
+
+      const { error: deleteSchedulesError } = await supabase
+        .from('medicine_schedules')
+        .delete()
+        .eq('patient_id', profileId);
+
+      if (deleteSchedulesError) throw deleteSchedulesError;
 
       // Insert updated medicines
       const medicinesData = data.medicines.map((med) => ({
@@ -172,6 +179,21 @@ const UpdateProfileForm = () => {
         .insert(medicinesData);
 
       if (medicinesError) throw medicinesError;
+
+      // Insert medicine schedules for the tracker
+      const schedulesData = data.medicines.map((med) => ({
+        patient_id: profileId,
+        medicine_name: med.medicine_name,
+        dosage: med.dosage,
+        time_slot: med.timings as 'morning' | 'afternoon' | 'evening' | 'night',
+        instruction: 'after_food' as const,
+      }));
+
+      const { error: schedulesError } = await supabase
+        .from('medicine_schedules')
+        .insert(schedulesData);
+
+      if (schedulesError) throw schedulesError;
 
       toast({
         title: "Success!",
