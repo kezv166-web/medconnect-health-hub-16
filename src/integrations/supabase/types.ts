@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      intake_logs: {
+        Row: {
+          created_at: string
+          id: string
+          log_date: string
+          schedule_id: string
+          status: Database["public"]["Enums"]["intake_status_enum"]
+          taken_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          log_date?: string
+          schedule_id: string
+          status?: Database["public"]["Enums"]["intake_status_enum"]
+          taken_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          log_date?: string
+          schedule_id?: string
+          status?: Database["public"]["Enums"]["intake_status_enum"]
+          taken_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intake_logs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "medicine_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medicine_schedules: {
+        Row: {
+          created_at: string
+          dosage: string
+          id: string
+          instruction: Database["public"]["Enums"]["food_instruction_enum"]
+          medicine_name: string
+          patient_id: string
+          time_slot: Database["public"]["Enums"]["time_slot_enum"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dosage: string
+          id?: string
+          instruction: Database["public"]["Enums"]["food_instruction_enum"]
+          medicine_name: string
+          patient_id: string
+          time_slot: Database["public"]["Enums"]["time_slot_enum"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string
+          id?: string
+          instruction?: Database["public"]["Enums"]["food_instruction_enum"]
+          medicine_name?: string
+          patient_id?: string
+          time_slot?: Database["public"]["Enums"]["time_slot_enum"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       medicines: {
         Row: {
           created_at: string
@@ -126,7 +194,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      food_instruction_enum: "before_food" | "after_food"
+      intake_status_enum: "taken" | "missed"
+      time_slot_enum: "morning" | "afternoon" | "evening" | "night"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -253,6 +323,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      food_instruction_enum: ["before_food", "after_food"],
+      intake_status_enum: ["taken", "missed"],
+      time_slot_enum: ["morning", "afternoon", "evening", "night"],
+    },
   },
 } as const
