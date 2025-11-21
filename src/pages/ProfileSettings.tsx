@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import PrescriptionUpload from "@/components/dashboard/PrescriptionUpload";
 
 const ProfileSettings = () => {
   const { toast } = useToast();
@@ -206,6 +207,9 @@ const ProfileSettings = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Prescription Upload */}
+      <PrescriptionUpload />
 
       {/* Action Buttons */}
       {isEditing && (
