@@ -100,30 +100,32 @@ const ProfileSettings = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-6 p-4 md:p-6 animate-fade-in">
       {/* Profile Banner */}
       <Card className="overflow-hidden">
-        <div className="relative h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5">
-          <div className="absolute -bottom-12 left-6 flex items-end gap-4">
-            <Avatar className="h-24 w-24 border-4 border-background">
+        <div className="relative h-48 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5">
+          <div className="absolute -bottom-16 left-6 flex items-end gap-4">
+            <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
               <AvatarImage src={formData.avatarUrl} alt={formData.fullName} />
-              <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+              <AvatarFallback className="text-3xl bg-primary text-primary-foreground">
                 {formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>
-          <div className="absolute top-4 right-4">
+        </div>
+        <div className="pt-20 pb-6 px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">{formData.fullName}</h2>
+              <p className="text-muted-foreground">{formData.email}</p>
+            </div>
             {!isEditing && (
-              <Button onClick={() => setIsEditing(true)} variant="secondary">
+              <Button onClick={() => setIsEditing(true)} variant="secondary" className="w-fit">
                 <Edit2 className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
             )}
           </div>
-        </div>
-        <div className="pt-14 pb-6 px-6">
-          <h2 className="text-2xl font-bold text-foreground">{formData.fullName}</h2>
-          <p className="text-muted-foreground">{formData.email}</p>
         </div>
       </Card>
 
