@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ interface LoginFormProps {
 
 const LoginForm = ({ role, onClose }: LoginFormProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const getRoleTitle = () => {
@@ -41,6 +43,15 @@ const LoginForm = ({ role, onClose }: LoginFormProps) => {
         description: `Welcome to ${getRoleTitle()} Portal!`,
       });
       setIsLoading(false);
+      
+      // Navigate based on role
+      if (role === "patient") {
+        navigate("/patient-dashboard");
+      } else if (role === "doctor") {
+        navigate("/doctor-dashboard");
+      } else if (role === "hospital") {
+        navigate("/hospital-dashboard");
+      }
     }, 1500);
   };
 
