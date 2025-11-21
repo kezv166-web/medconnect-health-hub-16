@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Calendar, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddMedicineForm from "@/components/medicine/AddMedicineForm";
+import MedicineSetupForm from "@/components/medicine/MedicineSetupForm";
 import MedicineList from "@/components/medicine/MedicineList";
 import FamilyMemberSelector from "@/components/medicine/FamilyMemberSelector";
 import { supabase } from "@/integrations/supabase/client";
@@ -165,61 +167,89 @@ const MedicineManagement = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Medicine Management</h1>
-          <p className="text-muted-foreground">
-            Track and manage your medications
-          </p>
-        </div>
-        <FamilyMemberSelector />
-      </div>
-
-      {/* Add Medicine Button */}
-      {!showAddForm && (
-        <Button
-          onClick={() => setShowAddForm(true)}
-          className="w-full sm:w-auto"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add New Medicine
-        </Button>
-      )}
-
-      {/* Add/Edit Medicine Form */}
-      {showAddForm && (
-        <Card className="border-primary/20 animate-scale-in">
-          <CardHeader>
-            <CardTitle>
-              {editingMedicine ? "Edit Medicine" : "Add New Medicine"}
-            </CardTitle>
-            <CardDescription>
-              {editingMedicine
-                ? "Update the medicine details below"
-                : "Fill in the details to add a new medicine to your regimen"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AddMedicineForm
-              onSubmit={editingMedicine ? handleUpdateMedicine : handleAddMedicine}
-              onCancel={handleCancelEdit}
-              initialData={editingMedicine || undefined}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Current Medicines List */}
       <div>
-        <h2 className="text-xl font-semibold text-foreground mb-4">
-          Current Medicines ({medicines.length})
-        </h2>
-        <MedicineList
-          medicines={medicines}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteMedicine}
-        />
+        <h1 className="text-3xl font-bold text-foreground mb-2">Medicine Management</h1>
+        <p className="text-muted-foreground">Track schedules and manage medications</p>
       </div>
+
+      <Tabs defaultValue="schedules" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="schedules">
+            <Calendar className="w-4 h-4 mr-2" />
+            Medicine Schedules
+          </TabsTrigger>
+          <TabsTrigger value="inventory">
+            <Package className="w-4 h-4 mr-2" />
+            Medicine Inventory
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Medicine Schedules Tab */}
+        <TabsContent value="schedules" className="space-y-6">
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle>Add Medicine Schedule</CardTitle>
+              <CardDescription>
+                Set up daily medication reminders with specific timing and instructions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MedicineSetupForm />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Medicine Inventory Tab */}
+        <TabsContent value="inventory" className="space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <FamilyMemberSelector />
+            {!showAddForm && (
+              <Button
+                onClick={() => setShowAddForm(true)}
+                className="w-full sm:w-auto"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Medicine
+              </Button>
+            )}
+          </div>
+
+          {/* Add/Edit Medicine Form */}
+          {showAddForm && (
+            <Card className="border-primary/20 animate-scale-in">
+              <CardHeader>
+                <CardTitle>
+                  {editingMedicine ? "Edit Medicine" : "Add New Medicine"}
+                </CardTitle>
+                <CardDescription>
+                  {editingMedicine
+                    ? "Update the medicine details below"
+                    : "Fill in the details to add a new medicine to your inventory"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AddMedicineForm
+                  onSubmit={editingMedicine ? handleUpdateMedicine : handleAddMedicine}
+                  onCancel={handleCancelEdit}
+                  initialData={editingMedicine || undefined}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Current Medicines List */}
+          <div>
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Current Medicines ({medicines.length})
+            </h2>
+            <MedicineList
+              medicines={medicines}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteMedicine}
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

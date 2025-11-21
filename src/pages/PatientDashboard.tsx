@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PatientSidebar from "@/components/dashboard/PatientSidebar";
-import AdherenceGraph from "@/components/dashboard/AdherenceGraph";
 import StatusCards from "@/components/dashboard/StatusCards";
 import HealthTips from "@/components/dashboard/HealthTips";
 import MedicineManagement from "@/pages/MedicineManagement";
 import ProfileSettings from "@/pages/ProfileSettings";
 import NearbyServices from "@/pages/NearbyServices";
 import FloatingChatButton from "@/components/ai/FloatingChatButton";
+import MedicineTrackerCarousel from "@/components/medicine/MedicineTrackerCarousel";
+import NextDoseWidget from "@/components/medicine/NextDoseWidget";
+import AdherenceAreaChart from "@/components/medicine/AdherenceAreaChart";
 
 type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "ai";
 
@@ -53,19 +55,22 @@ const PatientDashboard = () => {
               </p>
             </div>
 
+            {/* Next Dose Widget */}
+            <NextDoseWidget />
+
             {/* Status Cards */}
             <StatusCards />
 
-            {/* Adherence Graph */}
-            <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            {/* Medicine Tracker Carousel */}
+            <div>
               <h2 className="text-xl font-semibold text-foreground mb-4">
-                Medicine Adherence
+                Today's Medicine Tracker
               </h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                Your medication intake consistency over the last 7 days
-              </p>
-              <AdherenceGraph />
+              <MedicineTrackerCarousel />
             </div>
+
+            {/* Adherence Analytics */}
+            <AdherenceAreaChart />
 
             {/* Health Tips */}
             <HealthTips />
