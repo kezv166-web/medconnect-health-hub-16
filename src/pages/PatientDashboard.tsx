@@ -5,6 +5,7 @@ import StatusCards from "@/components/dashboard/StatusCards";
 import HealthTips from "@/components/dashboard/HealthTips";
 import MedicineManagement from "@/pages/MedicineManagement";
 import ProfileSettings from "@/pages/ProfileSettings";
+import UpdateProfileForm from "@/pages/UpdateProfileForm";
 import NearbyServices from "@/pages/NearbyServices";
 import FloatingChatButton from "@/components/ai/FloatingChatButton";
 import MedicineTrackerCarousel from "@/components/medicine/MedicineTrackerCarousel";
@@ -97,7 +98,7 @@ const PatientDashboard = () => {
 
         {activeTab === "form" && (
           <div className="p-6 animate-fade-in">
-            <ProfileSettings />
+            <UpdateProfileForm />
           </div>
         )}
       </main>
