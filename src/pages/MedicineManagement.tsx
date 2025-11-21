@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AddMedicineForm from "@/components/medicine/AddMedicineForm";
+import MedicineSetupForm from "@/components/medicine/MedicineSetupForm";
 import MedicineList from "@/components/medicine/MedicineList";
 import FamilyMemberSelector from "@/components/medicine/FamilyMemberSelector";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,12 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface Medicine {
   id: string;
-  name: string;
+  medicine_name: string;
   dosage: string;
-  frequency: number;
-  daysToIntake: number;
-  doctorName: string;
-  startDate: string;
+  time_slot: string;
+  instruction: string;
 }
 
 const MedicineManagement = () => {
@@ -26,114 +24,48 @@ const MedicineManagement = () => {
   const [patientId, setPatientId] = useState<string>("");
 
   useEffect(() => {
-    const fetchMedicines = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('patient_profiles')
-        .select('id, doctor_name')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (profile) {
-        setPatientId(profile.id);
-
-        const { data: medicinesData } = await supabase
-          .from('medicines')
-          .select('*')
-          .eq('patient_id', profile.id);
-
-        if (medicinesData) {
-          const formattedMedicines = medicinesData.map(med => ({
-            id: med.id,
-            name: med.medicine_name,
-            dosage: med.dosage,
-            frequency: parseInt(med.frequency.split(' ')[0]) || 1,
-            daysToIntake: med.duration_days,
-            doctorName: profile.doctor_name,
-            startDate: med.created_at.split('T')[0],
-          }));
-          setMedicines(formattedMedicines);
-        }
-      }
-    };
-
     fetchMedicines();
   }, []);
 
-  const handleAddMedicine = async (medicine: Omit<Medicine, "id">) => {
-    const { data, error } = await supabase
-      .from('medicines')
-      .insert({
-        patient_id: patientId,
-        medicine_name: medicine.name,
-        dosage: medicine.dosage,
-        frequency: `${medicine.frequency} times daily`,
-        timings: "As prescribed",
-        duration_days: medicine.daysToIntake,
-        quantity_remaining: medicine.daysToIntake * medicine.frequency,
-      })
-      .select()
-      .single();
+  const fetchMedicines = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add medicine",
-        variant: "destructive",
-      });
-    } else if (data) {
-      const newMedicine: Medicine = {
-        id: data.id,
-        name: data.medicine_name,
-        dosage: data.dosage,
-        frequency: medicine.frequency,
-        daysToIntake: data.duration_days,
-        doctorName: medicine.doctorName,
-        startDate: data.created_at.split('T')[0],
-      };
-      setMedicines([...medicines, newMedicine]);
-      setShowAddForm(false);
-      toast({
-        title: "Success",
-        description: "Medicine added successfully",
-      });
+    const { data: profile } = await supabase
+      .from('patient_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (profile) {
+      setPatientId(profile.id);
+
+      const { data: schedulesData } = await supabase
+        .from('medicine_schedules')
+        .select('*')
+        .eq('patient_id', profile.id);
+
+      if (schedulesData) {
+        const formattedMedicines = schedulesData.map(med => ({
+          id: med.id,
+          medicine_name: med.medicine_name,
+          dosage: med.dosage,
+          time_slot: med.time_slot,
+          instruction: med.instruction,
+        }));
+        setMedicines(formattedMedicines);
+      }
     }
   };
 
-  const handleUpdateMedicine = async (updated: Medicine) => {
-    const { error } = await supabase
-      .from('medicines')
-      .update({
-        medicine_name: updated.name,
-        dosage: updated.dosage,
-        frequency: `${updated.frequency} times daily`,
-        duration_days: updated.daysToIntake,
-        quantity_remaining: updated.daysToIntake * updated.frequency,
-      })
-      .eq('id', updated.id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update medicine",
-        variant: "destructive",
-      });
-    } else {
-      setMedicines(medicines.map((med) => (med.id === updated.id ? updated : med)));
-      setEditingMedicine(null);
-      setShowAddForm(false);
-      toast({
-        title: "Success",
-        description: "Medicine updated successfully",
-      });
-    }
+  const handleMedicineAdded = () => {
+    fetchMedicines();
+    setShowAddForm(false);
   };
 
   const handleDeleteMedicine = async (id: string) => {
     const { error } = await supabase
-      .from('medicines')
+      .from('medicine_schedules')
       .delete()
       .eq('id', id);
 
@@ -152,13 +84,7 @@ const MedicineManagement = () => {
     }
   };
 
-  const handleEditClick = (medicine: Medicine) => {
-    setEditingMedicine(medicine);
-    setShowAddForm(true);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingMedicine(null);
+  const handleCancelForm = () => {
     setShowAddForm(false);
   };
 
@@ -184,24 +110,19 @@ const MedicineManagement = () => {
           )}
         </div>
 
-        {/* Add/Edit Medicine Form */}
+        {/* Add Medicine Form */}
         {showAddForm && (
           <Card className="border-primary/20 animate-scale-in">
             <CardHeader>
-              <CardTitle>
-                {editingMedicine ? "Edit Medicine" : "Add New Medicine"}
-              </CardTitle>
+              <CardTitle>Add New Medicine</CardTitle>
               <CardDescription>
-                {editingMedicine
-                  ? "Update the medicine details below"
-                  : "Fill in the details to add a new medicine to your inventory"}
+                Fill in the details to add a new medicine schedule
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AddMedicineForm
-                onSubmit={editingMedicine ? handleUpdateMedicine : handleAddMedicine}
-                onCancel={handleCancelEdit}
-                initialData={editingMedicine || undefined}
+              <MedicineSetupForm
+                onSuccess={handleMedicineAdded}
+                onCancel={handleCancelForm}
               />
             </CardContent>
           </Card>
@@ -214,7 +135,6 @@ const MedicineManagement = () => {
           </h2>
           <MedicineList
             medicines={medicines}
-            onEdit={handleEditClick}
             onDelete={handleDeleteMedicine}
           />
         </div>
