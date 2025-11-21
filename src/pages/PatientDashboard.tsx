@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import PatientSidebar from "@/components/dashboard/PatientSidebar";
 import AdherenceGraph from "@/components/dashboard/AdherenceGraph";
 import StatusCards from "@/components/dashboard/StatusCards";
@@ -12,6 +13,25 @@ type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "ai";
 
 const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState<SidebarItem>("home");
+  const [patientName, setPatientName] = useState("Patient");
+
+  useEffect(() => {
+    const fetchPatientProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('patient_profiles')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (data) {
+          setPatientName(data.full_name.split(' ')[0]);
+        }
+      }
+    };
+    fetchPatientProfile();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -26,7 +46,7 @@ const PatientDashboard = () => {
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-foreground mb-2">
-                Welcome back, John
+                Welcome back, {patientName}
               </h1>
               <p className="text-muted-foreground">
                 Here's your health overview for today

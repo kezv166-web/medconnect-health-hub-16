@@ -1,34 +1,90 @@
+import { useEffect, useState } from "react";
 import { Clock, Pill, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-const statusData = [
-  {
-    icon: Clock,
-    label: "Next Dose Due",
-    value: "2:00 PM",
-    subtitle: "Metformin 500mg",
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-  },
-  {
-    icon: Pill,
-    label: "Medicines Remaining",
-    value: "12",
-    subtitle: "3 need refill soon",
-    color: "text-success",
-    bgColor: "bg-success/10",
-  },
-  {
-    icon: Calendar,
-    label: "Upcoming Appointment",
-    value: "Dec 24",
-    subtitle: "Dr. Sarah Johnson",
-    color: "text-destructive",
-    bgColor: "bg-destructive/10",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 const StatusCards = () => {
+  const [statusData, setStatusData] = useState([
+    {
+      icon: Clock,
+      label: "Next Dose Due",
+      value: "--",
+      subtitle: "Loading...",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+    {
+      icon: Pill,
+      label: "Medicines Remaining",
+      value: "0",
+      subtitle: "Loading...",
+      color: "text-success",
+      bgColor: "bg-success/10",
+    },
+    {
+      icon: Calendar,
+      label: "Upcoming Appointment",
+      value: "--",
+      subtitle: "Loading...",
+      color: "text-destructive",
+      bgColor: "bg-destructive/10",
+    },
+  ]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('patient_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const { data: medicines } = await supabase
+        .from('medicines')
+        .select('*')
+        .eq('patient_id', profile?.id || '')
+        .order('timings', { ascending: true });
+
+      const totalMedicines = medicines?.length || 0;
+      const needRefill = medicines?.filter(m => m.quantity_remaining < 10).length || 0;
+
+      const nextMedicine = medicines?.[0];
+
+      setStatusData([
+        {
+          icon: Clock,
+          label: "Next Dose Due",
+          value: nextMedicine?.timings || "--",
+          subtitle: nextMedicine?.medicine_name || "No medicines scheduled",
+          color: "text-primary",
+          bgColor: "bg-primary/10",
+        },
+        {
+          icon: Pill,
+          label: "Medicines Remaining",
+          value: totalMedicines.toString(),
+          subtitle: needRefill > 0 ? `${needRefill} need refill soon` : "All stocked well",
+          color: "text-success",
+          bgColor: "bg-success/10",
+        },
+        {
+          icon: Calendar,
+          label: "Upcoming Appointment",
+          value: profile?.next_follow_up_date ? format(new Date(profile.next_follow_up_date), "MMM dd") : "--",
+          subtitle: profile?.doctor_name || "No appointment scheduled",
+          color: "text-destructive",
+          bgColor: "bg-destructive/10",
+        },
+      ]);
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {statusData.map((item, index) => {

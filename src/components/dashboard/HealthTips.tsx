@@ -1,23 +1,47 @@
+import { useEffect, useState } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const recommendedDiets = [
-  "Leafy green vegetables (spinach, kale)",
-  "Whole grains (brown rice, quinoa)",
-  "Lean proteins (chicken, fish, tofu)",
-  "Fresh fruits (berries, apples, oranges)",
-  "Nuts and seeds (almonds, chia seeds)",
-];
-
-const foodsToAvoid = [
-  "Processed sugary foods and drinks",
-  "Trans fats and fried foods",
-  "Excessive red meat consumption",
-  "High-sodium packaged foods",
-  "Refined carbohydrates (white bread)",
-];
+import { supabase } from "@/integrations/supabase/client";
+import { getDietRecommendations } from "@/utils/diseaseRecommendations";
 
 const HealthTips = () => {
+  const [recommendedDiets, setRecommendedDiets] = useState<string[]>([
+    "Leafy green vegetables (spinach, kale)",
+    "Whole grains (brown rice, quinoa)",
+    "Lean proteins (chicken, fish, tofu)",
+    "Fresh fruits (berries, apples, oranges)",
+    "Nuts and seeds (almonds, chia seeds)",
+  ]);
+
+  const [foodsToAvoid, setFoodsToAvoid] = useState<string[]>([
+    "Processed sugary foods and drinks",
+    "Trans fats and fried foods",
+    "Excessive red meat consumption",
+    "High-sodium packaged foods",
+    "Refined carbohydrates (white bread)",
+  ]);
+
+  useEffect(() => {
+    const fetchHealthCondition = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('patient_profiles')
+        .select('primary_health_condition')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profile?.primary_health_condition) {
+        const recommendations = getDietRecommendations(profile.primary_health_condition);
+        setRecommendedDiets(recommendations.recommended);
+        setFoodsToAvoid(recommendations.avoid);
+      }
+    };
+
+    fetchHealthCondition();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Recommended Diets */}

@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AddMedicineForm from "@/components/medicine/AddMedicineForm";
 import MedicineList from "@/components/medicine/MedicineList";
 import FamilyMemberSelector from "@/components/medicine/FamilyMemberSelector";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Medicine {
   id: string;
@@ -16,48 +18,138 @@ export interface Medicine {
   startDate: string;
 }
 
-const initialMedicines: Medicine[] = [
-  {
-    id: "1",
-    name: "Metformin",
-    dosage: "500mg",
-    frequency: 2,
-    daysToIntake: 30,
-    doctorName: "Dr. Sarah Johnson",
-    startDate: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Lisinopril",
-    dosage: "10mg",
-    frequency: 1,
-    daysToIntake: 90,
-    doctorName: "Dr. Sarah Johnson",
-    startDate: "2024-01-15",
-  },
-];
-
 const MedicineManagement = () => {
-  const [medicines, setMedicines] = useState<Medicine[]>(initialMedicines);
+  const { toast } = useToast();
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null);
+  const [patientId, setPatientId] = useState<string>("");
 
-  const handleAddMedicine = (medicine: Omit<Medicine, "id">) => {
-    const newMedicine = {
-      ...medicine,
-      id: Date.now().toString(),
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('patient_profiles')
+        .select('id, doctor_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profile) {
+        setPatientId(profile.id);
+
+        const { data: medicinesData } = await supabase
+          .from('medicines')
+          .select('*')
+          .eq('patient_id', profile.id);
+
+        if (medicinesData) {
+          const formattedMedicines = medicinesData.map(med => ({
+            id: med.id,
+            name: med.medicine_name,
+            dosage: med.dosage,
+            frequency: parseInt(med.frequency.split(' ')[0]) || 1,
+            daysToIntake: med.duration_days,
+            doctorName: profile.doctor_name,
+            startDate: med.created_at.split('T')[0],
+          }));
+          setMedicines(formattedMedicines);
+        }
+      }
     };
-    setMedicines([...medicines, newMedicine]);
-    setShowAddForm(false);
+
+    fetchMedicines();
+  }, []);
+
+  const handleAddMedicine = async (medicine: Omit<Medicine, "id">) => {
+    const { data, error } = await supabase
+      .from('medicines')
+      .insert({
+        patient_id: patientId,
+        medicine_name: medicine.name,
+        dosage: medicine.dosage,
+        frequency: `${medicine.frequency} times daily`,
+        timings: "As prescribed",
+        duration_days: medicine.daysToIntake,
+        quantity_remaining: medicine.daysToIntake * medicine.frequency,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add medicine",
+        variant: "destructive",
+      });
+    } else if (data) {
+      const newMedicine: Medicine = {
+        id: data.id,
+        name: data.medicine_name,
+        dosage: data.dosage,
+        frequency: medicine.frequency,
+        daysToIntake: data.duration_days,
+        doctorName: medicine.doctorName,
+        startDate: data.created_at.split('T')[0],
+      };
+      setMedicines([...medicines, newMedicine]);
+      setShowAddForm(false);
+      toast({
+        title: "Success",
+        description: "Medicine added successfully",
+      });
+    }
   };
 
-  const handleUpdateMedicine = (updated: Medicine) => {
-    setMedicines(medicines.map((med) => (med.id === updated.id ? updated : med)));
-    setEditingMedicine(null);
+  const handleUpdateMedicine = async (updated: Medicine) => {
+    const { error } = await supabase
+      .from('medicines')
+      .update({
+        medicine_name: updated.name,
+        dosage: updated.dosage,
+        frequency: `${updated.frequency} times daily`,
+        duration_days: updated.daysToIntake,
+        quantity_remaining: updated.daysToIntake * updated.frequency,
+      })
+      .eq('id', updated.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update medicine",
+        variant: "destructive",
+      });
+    } else {
+      setMedicines(medicines.map((med) => (med.id === updated.id ? updated : med)));
+      setEditingMedicine(null);
+      setShowAddForm(false);
+      toast({
+        title: "Success",
+        description: "Medicine updated successfully",
+      });
+    }
   };
 
-  const handleDeleteMedicine = (id: string) => {
-    setMedicines(medicines.filter((med) => med.id !== id));
+  const handleDeleteMedicine = async (id: string) => {
+    const { error } = await supabase
+      .from('medicines')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete medicine",
+        variant: "destructive",
+      });
+    } else {
+      setMedicines(medicines.filter((med) => med.id !== id));
+      toast({
+        title: "Success",
+        description: "Medicine deleted successfully",
+      });
+    }
   };
 
   const handleEditClick = (medicine: Medicine) => {
