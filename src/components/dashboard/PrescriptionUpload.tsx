@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, FileText, Edit3 } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -44,16 +44,9 @@ const PrescriptionUpload = () => {
       toast({
         title: "Invalid File Type",
         description: "Please upload image files only (PNG, JPG, etc.)",
-        variant: "destructive",
+      variant: "destructive",
       });
     }
-  };
-
-  const handleManualEntry = () => {
-    toast({
-      title: "Manual Entry",
-      description: "Opening manual prescription entry form...",
-    });
   };
 
   return (
@@ -122,25 +115,6 @@ const PrescriptionUpload = () => {
             </p>
           </div>
         </div>
-
-        {/* Manual Entry Button */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or</span>
-          </div>
-        </div>
-
-        <Button 
-          variant="secondary" 
-          className="w-full"
-          onClick={handleManualEntry}
-        >
-          <Edit3 className="w-4 h-4 mr-2" />
-          Manual Entry
-        </Button>
       </CardContent>
     </Card>
   );

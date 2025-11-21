@@ -3,7 +3,6 @@ import PatientSidebar from "@/components/dashboard/PatientSidebar";
 import AdherenceGraph from "@/components/dashboard/AdherenceGraph";
 import StatusCards from "@/components/dashboard/StatusCards";
 import HealthTips from "@/components/dashboard/HealthTips";
-import PrescriptionUpload from "@/components/dashboard/PrescriptionUpload";
 import MedicineManagement from "@/pages/MedicineManagement";
 import ProfileSettings from "@/pages/ProfileSettings";
 import NearbyServices from "@/pages/NearbyServices";
@@ -50,9 +49,6 @@ const PatientDashboard = () => {
 
             {/* Health Tips */}
             <HealthTips />
-
-            {/* Prescription Upload */}
-            <PrescriptionUpload />
           </div>
         )}
 
