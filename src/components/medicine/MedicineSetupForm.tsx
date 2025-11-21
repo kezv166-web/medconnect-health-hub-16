@@ -154,18 +154,14 @@ export default function MedicineSetupForm({ onSuccess, onCancel }: MedicineSetup
       <div className="space-y-3">
         <Label>Food Instruction</Label>
         <RadioGroup value={instruction} onValueChange={(v) => setInstruction(v as FoodInstruction)}>
-          <div className="flex items-center space-x-3 rounded-lg border-2 border-border p-4">
+          <label className="flex items-center space-x-3 rounded-lg border-2 border-border p-4 cursor-pointer">
             <RadioGroupItem value="before_food" id="before_food" />
-            <Label htmlFor="before_food" className="cursor-pointer font-medium">
-              Before Food
-            </Label>
-          </div>
-          <div className="flex items-center space-x-3 rounded-lg border-2 border-border p-4">
+            <span className="font-medium">Before Food</span>
+          </label>
+          <label className="flex items-center space-x-3 rounded-lg border-2 border-border p-4 cursor-pointer">
             <RadioGroupItem value="after_food" id="after_food" />
-            <Label htmlFor="after_food" className="cursor-pointer font-medium">
-              After Food
-            </Label>
-          </div>
+            <span className="font-medium">After Food</span>
+          </label>
         </RadioGroup>
       </div>
 
