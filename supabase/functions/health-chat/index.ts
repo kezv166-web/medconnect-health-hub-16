@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, userProfile } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -19,6 +19,21 @@ serve(async (req) => {
     }
 
     console.log("Health chat request received with messages:", messages?.length);
+
+    // Build personalized context from user profile
+    let userContext = "";
+    if (userProfile) {
+      userContext = `\n\nPatient Information:
+- Name: ${userProfile.full_name}
+- Age: ${userProfile.age}
+- Primary Health Condition: ${userProfile.primary_health_condition || "Not specified"}
+- Doctor: Dr. ${userProfile.doctor_name} (${userProfile.specialty})
+- Hospital/Clinic: ${userProfile.hospital_clinic_name}
+- Last Consultation: ${userProfile.last_consultation_date || "Not recorded"}
+- Next Follow-up: ${userProfile.next_follow_up_date || "Not scheduled"}
+
+Use this information to provide personalized health advice while maintaining medical safety guidelines.`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -31,7 +46,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a helpful AI health assistant. Provide general health information and wellness advice.
+            content: `You are a helpful AI health assistant powered by Gemini 2.5. Provide general health information and wellness advice.
 
 IMPORTANT GUIDELINES:
 - Always remind users that your suggestions are for informational purposes only
@@ -40,7 +55,8 @@ IMPORTANT GUIDELINES:
 - Focus on general wellness, preventive care, and first aid basics
 - Never diagnose conditions or prescribe treatments
 - If asked about serious symptoms, always recommend seeing a doctor immediately
-- Use a caring, professional, and supportive tone`,
+- Use a caring, professional, and supportive tone
+- Remember the patient's medical history and provide context-aware responses${userContext}`,
           },
           ...messages,
         ],
