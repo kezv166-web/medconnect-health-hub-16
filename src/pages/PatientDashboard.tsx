@@ -7,6 +7,7 @@ import PrescriptionUpload from "@/components/dashboard/PrescriptionUpload";
 import MedicineManagement from "@/pages/MedicineManagement";
 import ProfileSettings from "@/pages/ProfileSettings";
 import NearbyServices from "@/pages/NearbyServices";
+import FloatingChatButton from "@/components/ai/FloatingChatButton";
 
 type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "ai";
 
@@ -16,6 +17,9 @@ const PatientDashboard = () => {
   return (
     <div className="min-h-screen bg-background flex">
       <PatientSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      {/* Floating AI Chat Button */}
+      <FloatingChatButton />
       
       <main className="flex-1 lg:ml-64">
         {activeTab === "home" && (
