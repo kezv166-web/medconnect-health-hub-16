@@ -90,12 +90,12 @@ const RoleSelector = () => {
           })}
         </div>
 
-        {/* Login Form */}
-        {selectedRole && (
-          <div className="max-w-md mx-auto animate-scale-in">
-            <LoginForm role={selectedRole} onClose={() => setSelectedRole(null)} />
-          </div>
-        )}
+        {/* Login Dialog */}
+        <LoginForm 
+          role={selectedRole} 
+          open={selectedRole !== null} 
+          onClose={() => setSelectedRole(null)} 
+        />
       </div>
     </section>
   );
