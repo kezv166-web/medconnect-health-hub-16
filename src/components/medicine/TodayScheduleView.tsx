@@ -359,15 +359,16 @@ export default function TodayScheduleView() {
               </div>
             </div>
 
-            {/* Cards grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Cards in horizontal scroll */}
+            <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
               {daypart.occurrences.map((occurrence) => (
-                <TodayScheduleCard
-                  key={occurrence.occurrenceId}
-                  occurrence={occurrence}
-                  onMarkTaken={handleMarkTaken}
-                  isSubmitting={submittingId === occurrence.occurrenceId}
-                />
+                <div key={occurrence.occurrenceId} className="flex-shrink-0 w-80 snap-start">
+                  <TodayScheduleCard
+                    occurrence={occurrence}
+                    onMarkTaken={handleMarkTaken}
+                    isSubmitting={submittingId === occurrence.occurrenceId}
+                  />
+                </div>
               ))}
             </div>
           </div>
