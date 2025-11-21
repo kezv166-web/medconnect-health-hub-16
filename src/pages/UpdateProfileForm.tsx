@@ -490,19 +490,19 @@ const UpdateProfileForm = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Timing *</Label>
+                    <Label>Timing Slot *</Label>
                     <Select
                       value={form.watch(`medicines.${index}.timings`)}
                       onValueChange={(value) => form.setValue(`medicines.${index}.timings`, value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select timing" />
+                        <SelectValue placeholder="Select timing slot" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Before Food">Before Food</SelectItem>
-                        <SelectItem value="After Food">After Food</SelectItem>
-                        <SelectItem value="With Food">With Food</SelectItem>
-                        <SelectItem value="Empty Stomach">Empty Stomach</SelectItem>
+                        <SelectItem value="morning">Morning</SelectItem>
+                        <SelectItem value="afternoon">Afternoon</SelectItem>
+                        <SelectItem value="evening">Evening</SelectItem>
+                        <SelectItem value="night">Night</SelectItem>
                       </SelectContent>
                     </Select>
                     {form.formState.errors.medicines?.[index]?.timings && (
@@ -552,7 +552,7 @@ const UpdateProfileForm = () => {
                   medicine_name: "",
                   dosage: "",
                   frequency: "Once daily",
-                  timings: "After Food",
+                  timings: "morning",
                   duration_days: 30,
                   quantity_remaining: 0,
                 })
