@@ -157,15 +157,15 @@ export default function MedicineSetupForm({ onSuccess, onCancel }: MedicineSetup
           value={instruction} 
           onValueChange={(value: string) => setInstruction(value as FoodInstruction)}
         >
-          <div className="flex items-center space-x-3 rounded-lg border-2 border-border p-4">
+          <div className="flex items-center space-x-2 p-3">
             <RadioGroupItem value="before_food" id="before_food" />
-            <Label htmlFor="before_food" className="cursor-pointer font-medium">
+            <Label htmlFor="before_food" className="cursor-pointer">
               Before Food
             </Label>
           </div>
-          <div className="flex items-center space-x-3 rounded-lg border-2 border-border p-4">
+          <div className="flex items-center space-x-2 p-3">
             <RadioGroupItem value="after_food" id="after_food" />
-            <Label htmlFor="after_food" className="cursor-pointer font-medium">
+            <Label htmlFor="after_food" className="cursor-pointer">
               After Food
             </Label>
           </div>
