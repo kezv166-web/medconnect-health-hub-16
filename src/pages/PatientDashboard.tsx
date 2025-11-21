@@ -6,6 +6,7 @@ import HealthTips from "@/components/dashboard/HealthTips";
 import PrescriptionUpload from "@/components/dashboard/PrescriptionUpload";
 import MedicineManagement from "@/pages/MedicineManagement";
 import ProfileSettings from "@/pages/ProfileSettings";
+import NearbyServices from "@/pages/NearbyServices";
 
 type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "ai";
 
@@ -65,8 +66,7 @@ const PatientDashboard = () => {
 
         {activeTab === "nearby" && (
           <div className="p-6 animate-fade-in">
-            <h1 className="text-3xl font-bold text-foreground mb-4">Nearby Services</h1>
-            <p className="text-muted-foreground">Nearby services section coming soon...</p>
+            <NearbyServices />
           </div>
         )}
 
