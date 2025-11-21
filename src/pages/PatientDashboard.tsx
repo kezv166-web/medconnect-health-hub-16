@@ -11,7 +11,7 @@ import MedicineTrackerCarousel from "@/components/medicine/MedicineTrackerCarous
 import NextDoseWidget from "@/components/medicine/NextDoseWidget";
 import AdherenceAreaChart from "@/components/medicine/AdherenceAreaChart";
 
-type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "ai";
+type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "form";
 
 const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState<SidebarItem>("home");
@@ -95,10 +95,9 @@ const PatientDashboard = () => {
           </div>
         )}
 
-        {activeTab === "ai" && (
+        {activeTab === "form" && (
           <div className="p-6 animate-fade-in">
-            <h1 className="text-3xl font-bold text-foreground mb-4">AI Assistant</h1>
-            <p className="text-muted-foreground">AI Assistant section coming soon...</p>
+            <ProfileSettings />
           </div>
         )}
       </main>
