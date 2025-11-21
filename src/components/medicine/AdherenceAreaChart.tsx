@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subDays } from "date-fns";
 
@@ -88,13 +87,6 @@ export default function AdherenceAreaChart() {
     );
   }
 
-  const chartConfig = {
-    adherence: {
-      label: "Adherence %",
-      color: "hsl(var(--primary))",
-    },
-  };
-
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-2">7-Day Adherence Trend</h3>
@@ -102,7 +94,7 @@ export default function AdherenceAreaChart() {
         Your medication intake consistency over the past week
       </p>
 
-      <ChartContainer config={chartConfig} className="h-64">
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
@@ -123,19 +115,19 @@ export default function AdherenceAreaChart() {
               domain={[0, 100]}
               tickFormatter={(value) => `${value}%`}
             />
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  formatter={(value, name, props) => (
-                    <>
-                      <div className="font-semibold">{value}% Adherence</div>
-                      <div className="text-xs text-muted-foreground">
-                        {props.payload.taken} of {props.payload.total} taken
-                      </div>
-                    </>
-                  )}
-                />
-              }
+            <Tooltip
+              content={({ active, payload }) => {
+                if (!active || !payload || !payload.length) return null;
+                const data = payload[0].payload;
+                return (
+                  <div className="rounded-lg border bg-background p-3 shadow-sm">
+                    <div className="font-semibold">{data.adherence}% Adherence</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {data.taken} of {data.total} taken
+                    </div>
+                  </div>
+                );
+              }}
             />
             <Area
               type="monotone"
@@ -147,7 +139,7 @@ export default function AdherenceAreaChart() {
             />
           </AreaChart>
         </ResponsiveContainer>
-      </ChartContainer>
+      </div>
 
       {data.length > 0 && (
         <div className="mt-6 grid grid-cols-3 gap-4">
