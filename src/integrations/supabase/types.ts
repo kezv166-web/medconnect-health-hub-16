@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      medicines: {
+        Row: {
+          created_at: string
+          dosage: string
+          duration_days: number
+          frequency: string
+          id: string
+          medicine_name: string
+          patient_id: string
+          quantity_remaining: number
+          timings: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dosage: string
+          duration_days: number
+          frequency: string
+          id?: string
+          medicine_name: string
+          patient_id: string
+          quantity_remaining: number
+          timings: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string
+          duration_days?: number
+          frequency?: string
+          id?: string
+          medicine_name?: string
+          patient_id?: string
+          quantity_remaining?: number
+          timings?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicines_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patient_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_profiles: {
+        Row: {
+          age: number
+          clinic_address: string
+          clinic_contact_number: string
+          created_at: string
+          doctor_name: string
+          email: string
+          full_name: string
+          hospital_clinic_name: string
+          id: string
+          last_consultation_date: string
+          next_follow_up_date: string
+          phone_number: string
+          primary_health_condition: string
+          specialty: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age: number
+          clinic_address: string
+          clinic_contact_number: string
+          created_at?: string
+          doctor_name: string
+          email: string
+          full_name: string
+          hospital_clinic_name: string
+          id?: string
+          last_consultation_date: string
+          next_follow_up_date: string
+          phone_number: string
+          primary_health_condition: string
+          specialty: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age?: number
+          clinic_address?: string
+          clinic_contact_number?: string
+          created_at?: string
+          doctor_name?: string
+          email?: string
+          full_name?: string
+          hospital_clinic_name?: string
+          id?: string
+          last_consultation_date?: string
+          next_follow_up_date?: string
+          phone_number?: string
+          primary_health_condition?: string
+          specialty?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { X, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import type { UserRole } from "./RoleSelector";
 
 interface LoginFormProps {
@@ -14,10 +19,28 @@ interface LoginFormProps {
   onClose: () => void;
 }
 
+const authSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type AuthFormData = z.infer<typeof authSchema>;
+
 const LoginForm = ({ role, onClose }: LoginFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const loginForm = useForm<AuthFormData>({
+    resolver: zodResolver(authSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const signupForm = useForm<AuthFormData>({
+    resolver: zodResolver(authSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
   const getRoleTitle = () => {
     switch (role) {
@@ -32,27 +55,67 @@ const LoginForm = ({ role, onClose }: LoginFormProps) => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, mode: "login" | "signup") => {
-    e.preventDefault();
+  const handleSubmit = async (data: AuthFormData, mode: "login" | "signup") => {
     setIsLoading(true);
+    setAuthError(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: mode === "login" ? "Login Successful" : "Account Created",
-        description: `Welcome to ${getRoleTitle()} Portal!`,
-      });
-      setIsLoading(false);
-      
-      // Navigate based on role
+    try {
       if (role === "patient") {
-        navigate("/patient-dashboard");
-      } else if (role === "doctor") {
-        navigate("/doctor-dashboard");
-      } else if (role === "hospital") {
-        navigate("/hospital-dashboard");
+        // Real authentication for patient role
+        if (mode === "login") {
+          const { data: authData, error } = await supabase.auth.signInWithPassword({
+            email: data.email,
+            password: data.password,
+          });
+
+          if (error) {
+            setAuthError(error.message.includes("Invalid login") ? "Invalid email or password" : error.message);
+            return;
+          }
+
+          if (authData.user) {
+            toast({ title: "Welcome back!", description: "You've successfully logged in." });
+            navigate("/patient-dashboard");
+          }
+        } else {
+          const redirectUrl = `${window.location.origin}/patient-dashboard`;
+          const { data: authData, error } = await supabase.auth.signUp({
+            email: data.email,
+            password: data.password,
+            options: { emailRedirectTo: redirectUrl },
+          });
+
+          if (error) {
+            setAuthError(error.message.includes("already registered") ? "Email already registered. Please login." : error.message);
+            return;
+          }
+
+          if (authData.user) {
+            toast({ title: "Account created!", description: "Welcome to MedConnect." });
+            navigate("/patient-onboarding");
+          }
+        }
+      } else {
+        // Mock authentication for doctor and hospital roles (not implemented yet)
+        setTimeout(() => {
+          toast({
+            title: mode === "login" ? "Login Successful" : "Account Created",
+            description: `Welcome to ${getRoleTitle()} Portal!`,
+          });
+          
+          if (role === "doctor") {
+            navigate("/doctor-dashboard");
+          } else if (role === "hospital") {
+            navigate("/hospital-dashboard");
+          }
+        }, 1500);
       }
-    }, 1500);
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      setAuthError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -72,6 +135,13 @@ const LoginForm = ({ role, onClose }: LoginFormProps) => {
       </CardHeader>
 
       <CardContent>
+        {authError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
+
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="login">Login</TabsTrigger>
@@ -79,16 +149,19 @@ const LoginForm = ({ role, onClose }: LoginFormProps) => {
           </TabsList>
 
           <TabsContent value="login">
-            <form onSubmit={(e) => handleSubmit(e, "login")} className="space-y-4">
+            <form onSubmit={loginForm.handleSubmit((data) => handleSubmit(data, "login"))} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="login-email">Email</Label>
                 <Input
                   id="login-email"
                   type="email"
                   placeholder="your.email@example.com"
-                  required
+                  {...loginForm.register("email")}
                   className="transition-all focus:ring-2 focus:ring-primary"
                 />
+                {loginForm.formState.errors.email && (
+                  <p className="text-sm text-destructive">{loginForm.formState.errors.email.message}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="login-password">Password</Label>
@@ -96,9 +169,12 @@ const LoginForm = ({ role, onClose }: LoginFormProps) => {
                   id="login-password"
                   type="password"
                   placeholder="••••••••"
-                  required
+                  {...loginForm.register("password")}
                   className="transition-all focus:ring-2 focus:ring-primary"
                 />
+                {loginForm.formState.errors.password && (
+                  <p className="text-sm text-destructive">{loginForm.formState.errors.password.message}</p>
+                )}
               </div>
               <Button
                 type="submit"
@@ -111,26 +187,19 @@ const LoginForm = ({ role, onClose }: LoginFormProps) => {
           </TabsContent>
 
           <TabsContent value="signup">
-            <form onSubmit={(e) => handleSubmit(e, "signup")} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signup-name">Full Name</Label>
-                <Input
-                  id="signup-name"
-                  type="text"
-                  placeholder="John Doe"
-                  required
-                  className="transition-all focus:ring-2 focus:ring-primary"
-                />
-              </div>
+            <form onSubmit={signupForm.handleSubmit((data) => handleSubmit(data, "signup"))} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="signup-email">Email</Label>
                 <Input
                   id="signup-email"
                   type="email"
                   placeholder="your.email@example.com"
-                  required
+                  {...signupForm.register("email")}
                   className="transition-all focus:ring-2 focus:ring-primary"
                 />
+                {signupForm.formState.errors.email && (
+                  <p className="text-sm text-destructive">{signupForm.formState.errors.email.message}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-password">Password</Label>
@@ -138,21 +207,13 @@ const LoginForm = ({ role, onClose }: LoginFormProps) => {
                   id="signup-password"
                   type="password"
                   placeholder="••••••••"
-                  required
-                  minLength={8}
+                  {...signupForm.register("password")}
                   className="transition-all focus:ring-2 focus:ring-primary"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signup-confirm">Confirm Password</Label>
-                <Input
-                  id="signup-confirm"
-                  type="password"
-                  placeholder="••••••••"
-                  required
-                  minLength={8}
-                  className="transition-all focus:ring-2 focus:ring-primary"
-                />
+                {signupForm.formState.errors.password && (
+                  <p className="text-sm text-destructive">{signupForm.formState.errors.password.message}</p>
+                )}
+                <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
               </div>
               <Button
                 type="submit"
