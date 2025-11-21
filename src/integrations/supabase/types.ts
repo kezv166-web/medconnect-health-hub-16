@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      hospital_profiles: {
+        Row: {
+          address: string
+          blood_bank_types: string[] | null
+          created_at: string
+          description: string | null
+          icu_beds_available: number | null
+          icu_beds_total: number | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          operating_hours: string
+          oxygen_cylinders_available: number | null
+          oxygen_cylinders_total: number | null
+          pharmacy_open: boolean | null
+          phone: string
+          specialties: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          blood_bank_types?: string[] | null
+          created_at?: string
+          description?: string | null
+          icu_beds_available?: number | null
+          icu_beds_total?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          operating_hours: string
+          oxygen_cylinders_available?: number | null
+          oxygen_cylinders_total?: number | null
+          pharmacy_open?: boolean | null
+          phone: string
+          specialties?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          blood_bank_types?: string[] | null
+          created_at?: string
+          description?: string | null
+          icu_beds_available?: number | null
+          icu_beds_total?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          operating_hours?: string
+          oxygen_cylinders_available?: number | null
+          oxygen_cylinders_total?: number | null
+          pharmacy_open?: boolean | null
+          phone?: string
+          specialties?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       intake_logs: {
         Row: {
           created_at: string

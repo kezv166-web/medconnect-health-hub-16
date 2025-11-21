@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import MapPlaceholder from "@/components/nearby/MapPlaceholder";
 import FacilityCard from "@/components/nearby/FacilityCard";
 import { facilities } from "@/data/facilitiesData";
+import { supabase } from "@/integrations/supabase/client";
 
 export type FacilityType = "hospital" | "clinic" | "pharmacy";
 
@@ -37,18 +38,69 @@ export interface Facility {
 
 const NearbyServices = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [allFacilities, setAllFacilities] = useState<Facility[]>(facilities);
   const [filteredFacilities, setFilteredFacilities] = useState<Facility[]>(facilities);
+
+  useEffect(() => {
+    fetchRegisteredHospitals();
+  }, []);
+
+  const fetchRegisteredHospitals = async () => {
+    const { data, error } = await supabase
+      .from('hospital_profiles')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching hospitals:', error);
+      return;
+    }
+
+    if (data) {
+      const registeredFacilities: Facility[] = data.map((hospital) => ({
+        id: hospital.id,
+        name: hospital.name,
+        type: "hospital" as FacilityType,
+        distance: 0.5, // Default distance, can be calculated based on coordinates
+        specialties: hospital.specialties || [],
+        resources: {
+          oxygenCylinders: {
+            available: hospital.oxygen_cylinders_available || 0,
+            total: hospital.oxygen_cylinders_total || 0,
+          },
+          bloodBank: hospital.blood_bank_types || [],
+          icuBeds: {
+            available: hospital.icu_beds_available || 0,
+            total: hospital.icu_beds_total || 0,
+          },
+          pharmacyOpen: hospital.pharmacy_open || false,
+        },
+        contact: {
+          phone: hospital.phone,
+          address: hospital.address,
+        },
+        coordinates: {
+          lat: Number(hospital.latitude) || 28.6139,
+          lng: Number(hospital.longitude) || 77.2090,
+        },
+      }));
+
+      // Merge registered hospitals with static facilities
+      const combined = [...registeredFacilities, ...facilities];
+      setAllFacilities(combined);
+      setFilteredFacilities(combined);
+    }
+  };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     
     if (!query.trim()) {
-      setFilteredFacilities(facilities);
+      setFilteredFacilities(allFacilities);
       return;
     }
 
     const lowerQuery = query.toLowerCase();
-    const filtered = facilities.filter((facility) => {
+    const filtered = allFacilities.filter((facility) => {
       // Search in name
       if (facility.name.toLowerCase().includes(lowerQuery)) return true;
       
