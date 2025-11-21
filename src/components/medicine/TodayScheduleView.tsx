@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import TodayScheduleCard, { MedicineOccurrence, OccurrenceStatus } from "./TodayScheduleCard";
+import { useMedicineNotifications } from "@/hooks/useMedicineNotifications";
 import { Sunrise, Sun, Sunset, Moon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -97,6 +98,9 @@ export default function TodayScheduleView() {
   const [occurrences, setOccurrences] = useState<MedicineOccurrence[]>([]);
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
+
+  // Enable notifications for medicine reminders
+  useMedicineNotifications(occurrences);
 
   useEffect(() => {
     fetchTodaySchedule();
