@@ -195,6 +195,8 @@ export type Database = {
       patient_profiles: {
         Row: {
           age: number
+          avatar_url: string | null
+          blood_group: string | null
           clinic_address: string
           clinic_contact_number: string
           created_at: string
@@ -213,6 +215,8 @@ export type Database = {
         }
         Insert: {
           age: number
+          avatar_url?: string | null
+          blood_group?: string | null
           clinic_address: string
           clinic_contact_number: string
           created_at?: string
@@ -231,6 +235,8 @@ export type Database = {
         }
         Update: {
           age?: number
+          avatar_url?: string | null
+          blood_group?: string | null
           clinic_address?: string
           clinic_contact_number?: string
           created_at?: string
