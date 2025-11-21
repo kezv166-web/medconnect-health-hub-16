@@ -9,6 +9,7 @@ import UpdateProfileForm from "@/pages/UpdateProfileForm";
 import NearbyServices from "@/pages/NearbyServices";
 import FloatingChatButton from "@/components/ai/FloatingChatButton";
 import MedicineTrackerCarousel from "@/components/medicine/MedicineTrackerCarousel";
+import TodayScheduleView from "@/components/medicine/TodayScheduleView";
 import NextDoseWidget from "@/components/medicine/NextDoseWidget";
 import AdherenceAreaChart from "@/components/medicine/AdherenceAreaChart";
 
@@ -62,12 +63,12 @@ const PatientDashboard = () => {
             {/* Status Cards */}
             <StatusCards />
 
-            {/* Medicine Tracker Carousel */}
+            {/* Medicine Schedule - New Production-Ready View */}
             <div>
               <h2 className="text-xl font-semibold text-foreground mb-4">
-                Today's Medicine Tracker
+                Today's Medicine Schedule
               </h2>
-              <MedicineTrackerCarousel />
+              <TodayScheduleView />
             </div>
 
             {/* Adherence Analytics */}
