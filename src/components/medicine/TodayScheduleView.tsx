@@ -132,72 +132,129 @@ export default function TodayScheduleView() {
         return;
       }
 
-      // Fetch schedules
-      const { data: schedulesData, error: schedulesError } = await supabase
+      // Fetch medicine schedules
+      const { data: schedulesData } = await supabase
         .from("medicine_schedules")
         .select("*")
         .eq("patient_id", profile.id);
 
-      if (schedulesError) throw schedulesError;
+      // Also fetch from medicines table
+      const { data: medicinesData } = await supabase
+        .from("medicines")
+        .select("*")
+        .eq("patient_id", profile.id);
 
-      if (!schedulesData || schedulesData.length === 0) {
-        setOccurrences([]);
-        setLoading(false);
-        return;
+      const allOccurrences: MedicineOccurrence[] = [];
+
+      // Process medicine_schedules
+      if (schedulesData && schedulesData.length > 0) {
+        const scheduleIds = schedulesData.map((s) => s.id);
+        const today = new Date().toISOString().split("T")[0];
+        
+        const { data: logsData } = await supabase
+          .from("intake_logs")
+          .select("schedule_id, status, log_date, created_at")
+          .eq("log_date", today)
+          .in("schedule_id", scheduleIds);
+
+        const logsMap = new Map<string, { status: string; takenAt: string }>();
+        logsData?.forEach((log) => {
+          logsMap.set(log.schedule_id, {
+            status: log.status,
+            takenAt: log.created_at
+          });
+        });
+
+        schedulesData.forEach((schedule) => {
+          const scheduledTimeLocal = parseScheduleTime(schedule.time_slot);
+          const daypart = timeSlotToDaypart(schedule.time_slot);
+          
+          const [time, period] = scheduledTimeLocal.split(" ");
+          const [hours, minutes] = time.split(":");
+          let hour = parseInt(hours);
+          if (period === "PM" && hour !== 12) hour += 12;
+          if (period === "AM" && hour === 12) hour = 0;
+          
+          const scheduledDateTime = new Date();
+          scheduledDateTime.setHours(hour, parseInt(minutes), 0, 0);
+          
+          const log = logsMap.get(schedule.id);
+          const takenAt = log?.status === "taken" ? log.takenAt : null;
+          const status = determineStatus(scheduledDateTime, takenAt);
+
+          allOccurrences.push({
+            occurrenceId: schedule.id,
+            medicineId: schedule.id,
+            medicineName: schedule.medicine_name,
+            dosage: schedule.dosage,
+            scheduledDateTimeISO: scheduledDateTime.toISOString(),
+            scheduledTimeLocal,
+            daypart,
+            status,
+            takenAt,
+            notes: null,
+            sourceIntakeId: profile.id,
+            instruction: schedule.instruction
+          });
+        });
       }
 
-      // Fetch today's intake logs
-      const today = new Date().toISOString().split("T")[0];
-      const { data: logsData } = await supabase
-        .from("intake_logs")
-        .select("schedule_id, status, log_date, created_at")
-        .eq("log_date", today)
-        .in("schedule_id", schedulesData.map((s) => s.id));
+      // Process medicines table - expand based on frequency
+      if (medicinesData && medicinesData.length > 0) {
+        medicinesData.forEach((medicine) => {
+          const frequency = medicine.frequency.toLowerCase();
+          const timing = medicine.timings.toLowerCase();
+          
+          // Parse frequency to determine occurrences
+          let occurrenceTimes: { time: string; daypart: "Morning" | "Afternoon" | "Evening" | "Night" }[] = [];
+          
+          if (frequency.includes("once")) {
+            // Once daily - use timing to determine when
+            if (timing.includes("before")) {
+              occurrenceTimes.push({ time: "08:00 AM", daypart: "Morning" });
+            } else {
+              occurrenceTimes.push({ time: "09:00 AM", daypart: "Morning" });
+            }
+          } else if (frequency.includes("twice")) {
+            occurrenceTimes.push({ time: "08:00 AM", daypart: "Morning" });
+            occurrenceTimes.push({ time: "08:00 PM", daypart: "Evening" });
+          } else if (frequency.includes("three")) {
+            occurrenceTimes.push({ time: "08:00 AM", daypart: "Morning" });
+            occurrenceTimes.push({ time: "02:00 PM", daypart: "Afternoon" });
+            occurrenceTimes.push({ time: "08:00 PM", daypart: "Evening" });
+          }
 
-      const logsMap = new Map<string, { status: string; takenAt: string }>();
-      logsData?.forEach((log) => {
-        logsMap.set(log.schedule_id, {
-          status: log.status,
-          takenAt: log.created_at
+          occurrenceTimes.forEach((occurrence, index) => {
+            const [time, period] = occurrence.time.split(" ");
+            const [hours, minutes] = time.split(":");
+            let hour = parseInt(hours);
+            if (period === "PM" && hour !== 12) hour += 12;
+            if (period === "AM" && hour === 12) hour = 0;
+            
+            const scheduledDateTime = new Date();
+            scheduledDateTime.setHours(hour, parseInt(minutes), 0, 0);
+            
+            const status = determineStatus(scheduledDateTime, null);
+
+            allOccurrences.push({
+              occurrenceId: `${medicine.id}-${index}`,
+              medicineId: medicine.id,
+              medicineName: medicine.medicine_name,
+              dosage: medicine.dosage,
+              scheduledDateTimeISO: scheduledDateTime.toISOString(),
+              scheduledTimeLocal: occurrence.time,
+              daypart: occurrence.daypart,
+              status,
+              takenAt: null,
+              notes: null,
+              sourceIntakeId: profile.id,
+              instruction: timing.includes("before") ? "before_food" : "after_food"
+            });
+          });
         });
-      });
+      }
 
-      // Generate occurrences for today
-      const todayOccurrences: MedicineOccurrence[] = schedulesData.map((schedule) => {
-        const scheduledTimeLocal = parseScheduleTime(schedule.time_slot);
-        const daypart = timeSlotToDaypart(schedule.time_slot);
-        
-        // Create a proper ISO datetime for today at the scheduled time
-        const [time, period] = scheduledTimeLocal.split(" ");
-        const [hours, minutes] = time.split(":");
-        let hour = parseInt(hours);
-        if (period === "PM" && hour !== 12) hour += 12;
-        if (period === "AM" && hour === 12) hour = 0;
-        
-        const scheduledDateTime = new Date();
-        scheduledDateTime.setHours(hour, parseInt(minutes), 0, 0);
-        
-        const log = logsMap.get(schedule.id);
-        const takenAt = log?.status === "taken" ? log.takenAt : null;
-        const status = determineStatus(scheduledDateTime, takenAt);
-
-        return {
-          occurrenceId: schedule.id,
-          medicineId: schedule.id,
-          medicineName: schedule.medicine_name,
-          dosage: schedule.dosage,
-          scheduledDateTimeISO: scheduledDateTime.toISOString(),
-          scheduledTimeLocal,
-          daypart,
-          status,
-          takenAt,
-          notes: null,
-          sourceIntakeId: profile.id,
-          instruction: schedule.instruction
-        };
-      });
-
-      setOccurrences(todayOccurrences);
+      setOccurrences(allOccurrences);
     } catch (error) {
       console.error("Error fetching today's schedule:", error);
       toast.error("Failed to load today's schedule");
