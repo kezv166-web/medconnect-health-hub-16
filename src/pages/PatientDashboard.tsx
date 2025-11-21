@@ -1,10 +1,11 @@
-import { Activity, User, Pill, MapPin, Bot } from "lucide-react";
 import { useState } from "react";
 import PatientSidebar from "@/components/dashboard/PatientSidebar";
 import AdherenceGraph from "@/components/dashboard/AdherenceGraph";
 import StatusCards from "@/components/dashboard/StatusCards";
 import HealthTips from "@/components/dashboard/HealthTips";
 import PrescriptionUpload from "@/components/dashboard/PrescriptionUpload";
+import MedicineManagement from "@/pages/MedicineManagement";
+import ProfileSettings from "@/pages/ProfileSettings";
 
 type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "ai";
 
@@ -52,15 +53,13 @@ const PatientDashboard = () => {
 
         {activeTab === "profile" && (
           <div className="p-6 animate-fade-in">
-            <h1 className="text-3xl font-bold text-foreground mb-4">My Profile</h1>
-            <p className="text-muted-foreground">Profile section coming soon...</p>
+            <ProfileSettings />
           </div>
         )}
 
         {activeTab === "medicines" && (
           <div className="p-6 animate-fade-in">
-            <h1 className="text-3xl font-bold text-foreground mb-4">My Medicines</h1>
-            <p className="text-muted-foreground">Medicines section coming soon...</p>
+            <MedicineManagement />
           </div>
         )}
 
