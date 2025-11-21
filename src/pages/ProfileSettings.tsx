@@ -118,13 +118,28 @@ const ProfileSettings = () => {
             <div>
               <h2 className="text-2xl font-bold text-foreground">{formData.fullName}</h2>
               <p className="text-muted-foreground">{formData.email}</p>
+              {isEditing && (
+                <p className="text-sm text-primary mt-1 font-medium">Editing Mode</p>
+              )}
             </div>
-            {!isEditing && (
-              <Button onClick={() => setIsEditing(true)} variant="secondary" className="w-fit">
-                <Edit2 className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Button>
-            )}
+            <div className="flex gap-2 w-fit">
+              {isEditing ? (
+                <>
+                  <Button variant="outline" onClick={handleCancel}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave}>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => setIsEditing(true)} variant="secondary">
+                  <Edit2 className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </Card>
@@ -288,19 +303,6 @@ const ProfileSettings = () => {
 
       {/* Health Report Upload */}
       <HealthReportUpload />
-
-      {/* Action Buttons */}
-      {isEditing && (
-        <div className="flex gap-3 justify-end animate-scale-in">
-          <Button variant="outline" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="w-4 h-4 mr-2" />
-            Save Changes
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
