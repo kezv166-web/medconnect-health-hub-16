@@ -1,38 +1,94 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Mail, Phone, AlertCircle, Stethoscope, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import PrescriptionUpload from "@/components/dashboard/PrescriptionUpload";
 
 const ProfileSettings = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [profileId, setProfileId] = useState<string>("");
   const [formData, setFormData] = useState({
-    fullName: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    emergencyContact: "+1 (555) 987-6543",
-    emergencyContactName: "Jane Doe",
-    linkedDoctor: "Dr. Sarah Johnson",
-    doctorSpecialization: "General Physician",
-    doctorPhone: "+1 (555) 234-5678",
+    fullName: "",
+    email: "",
+    phone: "",
+    age: 0,
+    primaryHealthCondition: "",
+    doctorName: "",
+    specialty: "",
+    hospitalClinicName: "",
+    clinicAddress: "",
+    clinicContactNumber: "",
   });
 
-  const handleSave = () => {
-    toast({
-      title: "Profile Updated",
-      description: "Your profile settings have been saved successfully",
-    });
-    setIsEditing(false);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('patient_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profile) {
+        setProfileId(profile.id);
+        setFormData({
+          fullName: profile.full_name,
+          email: profile.email,
+          phone: profile.phone_number,
+          age: profile.age,
+          primaryHealthCondition: profile.primary_health_condition,
+          doctorName: profile.doctor_name,
+          specialty: profile.specialty,
+          hospitalClinicName: profile.hospital_clinic_name,
+          clinicAddress: profile.clinic_address,
+          clinicContactNumber: profile.clinic_contact_number,
+        });
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    const { error } = await supabase
+      .from('patient_profiles')
+      .update({
+        full_name: formData.fullName,
+        phone_number: formData.phone,
+        age: formData.age,
+        primary_health_condition: formData.primaryHealthCondition,
+        doctor_name: formData.doctorName,
+        specialty: formData.specialty,
+        hospital_clinic_name: formData.hospitalClinicName,
+        clinic_address: formData.clinicAddress,
+        clinic_contact_number: formData.clinicContactNumber,
+      })
+      .eq('id', profileId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Profile Updated",
+        description: "Your profile settings have been saved successfully",
+      });
+      setIsEditing(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset form data if needed
   };
 
   return (
@@ -64,7 +120,6 @@ const ProfileSettings = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Full Name */}
             <div className="space-y-2">
               <Label htmlFor="fullName" className="flex items-center gap-2">
                 <User className="w-4 h-4 text-muted-foreground" />
@@ -78,7 +133,6 @@ const ProfileSettings = () => {
               />
             </div>
 
-            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-muted-foreground" />
@@ -88,12 +142,10 @@ const ProfileSettings = () => {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                disabled={!isEditing}
+                disabled
               />
             </div>
 
-            {/* Phone */}
             <div className="space-y-2">
               <Label htmlFor="phone" className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-muted-foreground" />
@@ -107,46 +159,24 @@ const ProfileSettings = () => {
                 disabled={!isEditing}
               />
             </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Emergency Contact */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-destructive" />
-            Emergency Contact
-          </CardTitle>
-          <CardDescription>
-            Person to contact in case of medical emergency
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Emergency Contact Name */}
             <div className="space-y-2">
-              <Label htmlFor="emergencyName">Contact Name</Label>
+              <Label htmlFor="age">Age</Label>
               <Input
-                id="emergencyName"
-                value={formData.emergencyContactName}
-                onChange={(e) =>
-                  setFormData({ ...formData, emergencyContactName: e.target.value })
-                }
+                id="age"
+                type="number"
+                value={formData.age}
+                onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) })}
                 disabled={!isEditing}
               />
             </div>
 
-            {/* Emergency Contact Phone */}
-            <div className="space-y-2">
-              <Label htmlFor="emergencyPhone">Contact Phone</Label>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="healthCondition">Primary Health Condition</Label>
               <Input
-                id="emergencyPhone"
-                type="tel"
-                value={formData.emergencyContact}
-                onChange={(e) =>
-                  setFormData({ ...formData, emergencyContact: e.target.value })
-                }
+                id="healthCondition"
+                value={formData.primaryHealthCondition}
+                onChange={(e) => setFormData({ ...formData, primaryHealthCondition: e.target.value })}
                 disabled={!isEditing}
               />
             </div>
@@ -159,48 +189,59 @@ const ProfileSettings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Stethoscope className="w-5 h-5 text-success" />
-            Linked Doctor
+            Linked Doctor & Clinic
           </CardTitle>
           <CardDescription>Your primary care physician details</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Doctor Name */}
             <div className="space-y-2">
               <Label htmlFor="doctorName">Doctor's Name</Label>
               <Input
                 id="doctorName"
-                value={formData.linkedDoctor}
-                onChange={(e) =>
-                  setFormData({ ...formData, linkedDoctor: e.target.value })
-                }
+                value={formData.doctorName}
+                onChange={(e) => setFormData({ ...formData, doctorName: e.target.value })}
                 disabled={!isEditing}
               />
             </div>
 
-            {/* Specialization */}
             <div className="space-y-2">
-              <Label htmlFor="specialization">Specialization</Label>
+              <Label htmlFor="specialty">Specialization</Label>
               <Input
-                id="specialization"
-                value={formData.doctorSpecialization}
-                onChange={(e) =>
-                  setFormData({ ...formData, doctorSpecialization: e.target.value })
-                }
+                id="specialty"
+                value={formData.specialty}
+                onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
                 disabled={!isEditing}
               />
             </div>
 
-            {/* Doctor Phone */}
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="doctorPhone">Doctor's Phone</Label>
+              <Label htmlFor="hospitalName">Hospital/Clinic Name</Label>
               <Input
-                id="doctorPhone"
+                id="hospitalName"
+                value={formData.hospitalClinicName}
+                onChange={(e) => setFormData({ ...formData, hospitalClinicName: e.target.value })}
+                disabled={!isEditing}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="clinicAddress">Clinic Address</Label>
+              <Input
+                id="clinicAddress"
+                value={formData.clinicAddress}
+                onChange={(e) => setFormData({ ...formData, clinicAddress: e.target.value })}
+                disabled={!isEditing}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="clinicPhone">Clinic Contact Number</Label>
+              <Input
+                id="clinicPhone"
                 type="tel"
-                value={formData.doctorPhone}
-                onChange={(e) =>
-                  setFormData({ ...formData, doctorPhone: e.target.value })
-                }
+                value={formData.clinicContactNumber}
+                onChange={(e) => setFormData({ ...formData, clinicContactNumber: e.target.value })}
                 disabled={!isEditing}
               />
             </div>
