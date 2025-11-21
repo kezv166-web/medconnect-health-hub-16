@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { User, Mail, Phone, AlertCircle, Stethoscope, Save } from "lucide-react";
+import { User, Mail, Phone, AlertCircle, Stethoscope, Save, Edit2, Droplet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import PrescriptionUpload from "@/components/dashboard/PrescriptionUpload";
+import HealthReportUpload from "@/components/dashboard/HealthReportUpload";
 
 const ProfileSettings = () => {
   const { toast } = useToast();
@@ -17,12 +19,14 @@ const ProfileSettings = () => {
     email: "",
     phone: "",
     age: 0,
+    bloodGroup: "",
     primaryHealthCondition: "",
     doctorName: "",
     specialty: "",
     hospitalClinicName: "",
     clinicAddress: "",
     clinicContactNumber: "",
+    avatarUrl: "",
   });
 
   useEffect(() => {
@@ -43,12 +47,14 @@ const ProfileSettings = () => {
           email: profile.email,
           phone: profile.phone_number,
           age: profile.age,
+          bloodGroup: profile.blood_group || "",
           primaryHealthCondition: profile.primary_health_condition,
           doctorName: profile.doctor_name,
           specialty: profile.specialty,
           hospitalClinicName: profile.hospital_clinic_name,
           clinicAddress: profile.clinic_address,
           clinicContactNumber: profile.clinic_contact_number,
+          avatarUrl: profile.avatar_url || "",
         });
       }
     };
@@ -63,12 +69,14 @@ const ProfileSettings = () => {
         full_name: formData.fullName,
         phone_number: formData.phone,
         age: formData.age,
+        blood_group: formData.bloodGroup,
         primary_health_condition: formData.primaryHealthCondition,
         doctor_name: formData.doctorName,
         specialty: formData.specialty,
         hospital_clinic_name: formData.hospitalClinicName,
         clinic_address: formData.clinicAddress,
         clinic_contact_number: formData.clinicContactNumber,
+        avatar_url: formData.avatarUrl,
       })
       .eq('id', profileId);
 
@@ -93,21 +101,31 @@ const ProfileSettings = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Profile Settings</h1>
-          <p className="text-muted-foreground">
-            Manage your personal information and preferences
-          </p>
+      {/* Profile Banner */}
+      <Card className="overflow-hidden">
+        <div className="relative h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5">
+          <div className="absolute -bottom-12 left-6 flex items-end gap-4">
+            <Avatar className="h-24 w-24 border-4 border-background">
+              <AvatarImage src={formData.avatarUrl} alt={formData.fullName} />
+              <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                {formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          <div className="absolute top-4 right-4">
+            {!isEditing && (
+              <Button onClick={() => setIsEditing(true)} variant="secondary">
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+            )}
+          </div>
         </div>
-        {!isEditing && (
-          <Button onClick={() => setIsEditing(true)}>
-            <User className="w-4 h-4 mr-2" />
-            Edit Profile
-          </Button>
-        )}
-      </div>
+        <div className="pt-14 pb-6 px-6">
+          <h2 className="text-2xl font-bold text-foreground">{formData.fullName}</h2>
+          <p className="text-muted-foreground">{formData.email}</p>
+        </div>
+      </Card>
 
       {/* Personal Information */}
       <Card>
@@ -171,7 +189,21 @@ const ProfileSettings = () => {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
+              <Label htmlFor="bloodGroup" className="flex items-center gap-2">
+                <Droplet className="w-4 h-4 text-muted-foreground" />
+                Blood Group
+              </Label>
+              <Input
+                id="bloodGroup"
+                value={formData.bloodGroup}
+                onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
+                disabled={!isEditing}
+                placeholder="e.g., A+, O-, B+"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="healthCondition">Primary Health Condition</Label>
               <Input
                 id="healthCondition"
@@ -251,6 +283,9 @@ const ProfileSettings = () => {
 
       {/* Prescription Upload */}
       <PrescriptionUpload />
+
+      {/* Health Report Upload */}
+      <HealthReportUpload />
 
       {/* Action Buttons */}
       {isEditing && (
