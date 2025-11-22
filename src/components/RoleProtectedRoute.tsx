@@ -47,12 +47,9 @@ const RoleProtectedRoute = ({ children, allowedRole }: RoleProtectedRouteProps) 
         if (userRole === allowedRole) {
           setIsAuthorized(true);
           setIsChecking(false);
-        } else if (userRole) {
-          // Redirect to their correct dashboard based on their actual role
-          navigate(`/${userRole}-dashboard`);
         } else {
-          // No role found – send them to patient dashboard by default
-          navigate("/patient-dashboard");
+          // Role mismatch or no role found: prevent cross-portal access
+          navigate("/");
         }
       } catch (error) {
         console.error("Error in role check:", error);
