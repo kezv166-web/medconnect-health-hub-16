@@ -113,7 +113,7 @@ const PatientConnect = () => {
       {/* Invite Patient Button */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button>
+          <Button className="bg-success hover:bg-success/90">
             <UserPlus className="w-4 h-4 mr-2" />
             Add Patient
           </Button>
