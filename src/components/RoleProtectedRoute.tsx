@@ -15,8 +15,13 @@ const RoleProtectedRoute = ({ children, allowedRole }: RoleProtectedRouteProps) 
   useEffect(() => {
     const checkRoleAndAuth = async () => {
       try {
-        // Check for mock auth sessions (doctor/hospital) - use localStorage for persistence
-        const mockRole = localStorage.getItem("mockRole");
+        // Check for mock auth sessions (doctor/hospital) - check both storage locations
+        let mockRole = localStorage.getItem("mockRole") ?? sessionStorage.getItem("mockRole");
+        
+        // Sync to localStorage if found only in sessionStorage
+        if (mockRole && !localStorage.getItem("mockRole")) {
+          localStorage.setItem("mockRole", mockRole);
+        }
         
         if (mockRole === "doctor" || mockRole === "hospital") {
           // Mock authentication for doctor/hospital
