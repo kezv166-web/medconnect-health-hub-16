@@ -90,7 +90,10 @@ const HospitalDashboard = () => {
           <Button
             variant="ghost"
             className="w-full justify-start text-muted-foreground hover:text-foreground"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              sessionStorage.removeItem("mockRole");
+              navigate("/");
+            }}
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout
