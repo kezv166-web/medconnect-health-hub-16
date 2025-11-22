@@ -193,8 +193,8 @@ const DoctorSettings = () => {
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10">
-            <Shield className="w-6 h-6 text-primary" />
+          <div className="p-3 rounded-xl bg-gradient-to-br from-success/20 to-success/5 border border-success/10">
+            <Shield className="w-6 h-6 text-success" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">Account Security</h1>
@@ -204,12 +204,12 @@ const DoctorSettings = () => {
       </div>
 
       {/* Change Password */}
-      <Card className="border-primary/20 shadow-lg overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-primary/70 to-primary/30" />
+      <Card className="border-success/20 shadow-lg overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-success via-success/70 to-success/30" />
         <CardHeader className="space-y-3 pb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20">
-              <Lock className="w-5 h-5 text-primary" />
+            <div className="p-2.5 rounded-lg bg-success/10 border border-success/20">
+              <Lock className="w-5 h-5 text-success" />
             </div>
             <div>
               <CardTitle className="text-xl">Change Password</CardTitle>
@@ -232,7 +232,7 @@ const DoctorSettings = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Enter your current password"
-                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-success/20"
               />
             </div>
 
@@ -249,7 +249,7 @@ const DoctorSettings = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password (minimum 6 characters)"
-                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-success/20"
               />
               {newPassword && (
                 <div className="space-y-2 animate-fade-in">
@@ -284,7 +284,7 @@ const DoctorSettings = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter your new password"
-                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-success/20"
               />
               {confirmPassword && newPassword !== confirmPassword && (
                 <p className="text-xs text-destructive animate-fade-in">Passwords do not match</p>
