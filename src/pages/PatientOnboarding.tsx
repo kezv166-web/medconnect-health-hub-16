@@ -74,6 +74,8 @@ const PatientOnboarding = () => {
       hospital_clinic_name: "",
       clinic_address: "",
       clinic_contact_number: "",
+      last_consultation_date: undefined,
+      next_follow_up_date: undefined,
       medicines: [
         {
           medicine_name: "",
