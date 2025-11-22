@@ -70,8 +70,8 @@ const PatientConnect = () => {
       name: referralData.name || "New Patient",
       email: referralData.email,
       phone: referralData.phone,
-      lastVisit: "Pending",
-      status: "pending",
+      lastVisit: new Date().toISOString().split('T')[0],
+      status: "active",
     };
 
     setPatients([...patients, newPatient]);
@@ -187,11 +187,8 @@ const PatientConnect = () => {
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-3">
                       <h4 className="text-lg font-semibold text-foreground">{patient.name}</h4>
-                      <Badge
-                        variant={patient.status === "active" ? "default" : "secondary"}
-                        className={patient.status === "active" ? "bg-success" : ""}
-                      >
-                        {patient.status === "active" ? "Active" : "Pending"}
+                      <Badge variant="default" className="bg-success">
+                        Active
                       </Badge>
                     </div>
 
@@ -207,10 +204,7 @@ const PatientConnect = () => {
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
                         <span>
-                          Last Visit:{" "}
-                          {patient.lastVisit === "Pending"
-                            ? "Pending"
-                            : new Date(patient.lastVisit).toLocaleDateString()}
+                          Last Visit: {new Date(patient.lastVisit).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -218,17 +212,9 @@ const PatientConnect = () => {
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    {patient.status === "pending" && (
-                      <Button variant="outline" size="sm">
-                        <Send className="w-4 h-4 mr-2" />
-                        Resend Invite
-                      </Button>
-                    )}
-                    {patient.status === "active" && (
-                      <Button variant="outline" size="sm">
-                        View Records
-                      </Button>
-                    )}
+                    <Button variant="outline" size="sm">
+                      View Record
+                    </Button>
                   </div>
                 </div>
               </CardContent>
