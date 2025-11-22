@@ -639,16 +639,18 @@ const PatientOnboarding = () => {
                         </Select>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-[1fr_auto] gap-3">
                         <div>
-                          <Label>Time *</Label>
+                          <Label htmlFor={`medicines.${index}.time`}>Time *</Label>
                           <Input
+                            id={`medicines.${index}.time`}
                             {...form.register(`medicines.${index}.time`)}
-                            placeholder="08:00"
+                            placeholder="09:00"
                             type="time"
+                            className="transition-all duration-200 hover:border-primary/50 focus:border-primary"
                           />
                         </div>
-                        <div>
+                        <div className="w-24">
                           <Label>Period *</Label>
                           <Select
                             value={form.watch(`medicines.${index}.period`)}
@@ -656,7 +658,7 @@ const PatientOnboarding = () => {
                               form.setValue(`medicines.${index}.period`, value as "AM" | "PM")
                             }
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="transition-all duration-200 hover:border-primary/50">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-background z-50">
