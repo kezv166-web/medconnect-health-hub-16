@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { Activity, Building2, Users, Settings, LogOut, Menu, X } from "lucide-react";
+import { Activity, Building2, Users, Settings, LogOut, Menu, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import ResourceControlCenter from "@/components/hospital/ResourceControlCenter";
 import DoctorRoster from "@/components/hospital/DoctorRoster";
+import HospitalRegistration from "@/components/hospital/HospitalRegistration";
 
-type TabType = "resources" | "roster" | "settings";
+type TabType = "profile" | "resources" | "roster" | "settings";
 
 const HospitalDashboard = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("resources");
+  const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   const navItems = [
+    { id: "profile" as const, icon: FileText, label: "Hospital Profile" },
     { id: "resources" as const, icon: Building2, label: "Resource Control" },
     { id: "roster" as const, icon: Users, label: "Doctor Roster" },
     { id: "settings" as const, icon: Settings, label: "Settings" },
@@ -112,6 +114,12 @@ const HospitalDashboard = () => {
       {/* Main content */}
       <main className="flex-1 lg:ml-64 pt-16 lg:pt-0">
         <div className="p-6">
+          {activeTab === "profile" && (
+            <div className="animate-fade-in">
+              <HospitalRegistration />
+            </div>
+          )}
+
           {activeTab === "resources" && (
             <div className="animate-fade-in">
               <div className="mb-8">
