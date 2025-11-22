@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Activity, Building2, Users, Settings, LogOut, Menu, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,13 +6,34 @@ import { useNavigate } from "react-router-dom";
 import ResourceControlCenter from "@/components/hospital/ResourceControlCenter";
 import DoctorRoster from "@/components/hospital/DoctorRoster";
 import HospitalRegistration from "@/components/hospital/HospitalRegistration";
+import { supabase } from "@/integrations/supabase/client";
 
 type TabType = "profile" | "resources" | "roster" | "settings";
 
 const HospitalDashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hospitalName, setHospitalName] = useState("Hospital");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchHospitalName();
+  }, []);
+
+  const fetchHospitalName = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('hospital_profiles')
+      .select('name')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (data) {
+      setHospitalName(data.name);
+    }
+  };
 
   const navItems = [
     { id: "profile" as const, icon: FileText, label: "Hospital Profile" },
@@ -86,7 +107,7 @@ const HospitalDashboard = () => {
         <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
           <div className="px-4 py-3 bg-destructive/10 rounded-lg border border-destructive/20">
             <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
-            <p className="font-semibold text-foreground">City General Hospital</p>
+            <p className="font-semibold text-foreground">{hospitalName}</p>
             <p className="text-xs text-muted-foreground">Hospital Authority</p>
           </div>
           <Button
