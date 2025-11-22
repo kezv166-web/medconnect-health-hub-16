@@ -146,6 +146,7 @@ export default function TodayScheduleView() {
         .eq("patient_id", profile.id);
 
       const allOccurrences: MedicineOccurrence[] = [];
+      const scheduledMedicineNames = new Set<string>();
 
       // Process medicine_schedules
       if (schedulesData && schedulesData.length > 0) {
@@ -183,6 +184,8 @@ export default function TodayScheduleView() {
           const takenAt = log?.status === "taken" ? log.takenAt : null;
           const status = determineStatus(scheduledDateTime, takenAt);
 
+          scheduledMedicineNames.add(schedule.medicine_name.toLowerCase());
+
           allOccurrences.push({
             occurrenceId: schedule.id,
             medicineId: schedule.id,
@@ -201,9 +204,14 @@ export default function TodayScheduleView() {
         });
       }
 
-      // Process medicines table - expand based on frequency
+      // Process medicines table - expand based on frequency (skip duplicates)
       if (medicinesData && medicinesData.length > 0) {
         medicinesData.forEach((medicine) => {
+          // Skip if this medicine is already in schedules
+          if (scheduledMedicineNames.has(medicine.medicine_name.toLowerCase())) {
+            return;
+          }
+
           const frequency = medicine.frequency.toLowerCase();
           const timing = medicine.timings.toLowerCase();
           
