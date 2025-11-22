@@ -42,7 +42,8 @@ const medicineSchema = z.object({
   dosage: z.string().min(1, "Dosage is required"),
   frequency: z.string().min(1, "Frequency is required"),
   timings: z.string().min(1, "Timing is required"),
-  time_of_day: z.string().min(1, "Time is required"),
+  time: z.string().min(1, "Time is required"),
+  period: z.enum(["AM", "PM"]),
   duration_days: z.number().min(1, "Duration must be at least 1 day"),
   quantity_remaining: z.number().min(0, "Quantity cannot be negative"),
 });
@@ -83,7 +84,8 @@ const PatientOnboarding = () => {
           dosage: "",
           frequency: "Once daily",
           timings: "After Food",
-          time_of_day: "8:00 AM",
+          time: "",
+          period: "AM",
           duration_days: 30,
           quantity_remaining: 0,
         },
@@ -637,37 +639,32 @@ const PatientOnboarding = () => {
                         </Select>
                       </div>
 
-                      <div>
-                        <Label>Time of Day *</Label>
-                        <Select
-                          value={form.watch(`medicines.${index}.time_of_day`)}
-                          onValueChange={(value) =>
-                            form.setValue(`medicines.${index}.time_of_day`, value)
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select time" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background z-50 max-h-[200px]">
-                            <SelectItem value="6:00 AM">6:00 AM</SelectItem>
-                            <SelectItem value="7:00 AM">7:00 AM</SelectItem>
-                            <SelectItem value="8:00 AM">8:00 AM</SelectItem>
-                            <SelectItem value="9:00 AM">9:00 AM</SelectItem>
-                            <SelectItem value="10:00 AM">10:00 AM</SelectItem>
-                            <SelectItem value="11:00 AM">11:00 AM</SelectItem>
-                            <SelectItem value="12:00 PM">12:00 PM</SelectItem>
-                            <SelectItem value="1:00 PM">1:00 PM</SelectItem>
-                            <SelectItem value="2:00 PM">2:00 PM</SelectItem>
-                            <SelectItem value="3:00 PM">3:00 PM</SelectItem>
-                            <SelectItem value="4:00 PM">4:00 PM</SelectItem>
-                            <SelectItem value="5:00 PM">5:00 PM</SelectItem>
-                            <SelectItem value="6:00 PM">6:00 PM</SelectItem>
-                            <SelectItem value="7:00 PM">7:00 PM</SelectItem>
-                            <SelectItem value="8:00 PM">8:00 PM</SelectItem>
-                            <SelectItem value="9:00 PM">9:00 PM</SelectItem>
-                            <SelectItem value="10:00 PM">10:00 PM</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label>Time *</Label>
+                          <Input
+                            {...form.register(`medicines.${index}.time`)}
+                            placeholder="08:00"
+                            type="time"
+                          />
+                        </div>
+                        <div>
+                          <Label>Period *</Label>
+                          <Select
+                            value={form.watch(`medicines.${index}.period`)}
+                            onValueChange={(value) =>
+                              form.setValue(`medicines.${index}.period`, value as "AM" | "PM")
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background z-50">
+                              <SelectItem value="AM">AM</SelectItem>
+                              <SelectItem value="PM">PM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
                       <div>
