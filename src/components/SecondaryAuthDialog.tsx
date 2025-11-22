@@ -71,11 +71,15 @@ const SecondaryAuthDialog = ({ open, onOpenChange, role, onSuccess }: SecondaryA
 
         if (authData.user) {
           // Check if user already has a role in the database
-          const { data: existingRole } = await supabase
+          const { data: existingRole, error: roleError } = await supabase
             .from('user_roles')
             .select('role')
             .eq('user_id', authData.user.id)
-            .single();
+            .maybeSingle();
+
+          if (roleError) {
+            console.error("Error fetching existing role:", roleError);
+          }
           
           // If no role exists, insert the appropriate role
           if (!existingRole) {
@@ -105,11 +109,15 @@ const SecondaryAuthDialog = ({ open, onOpenChange, role, onSuccess }: SecondaryA
 
         if (authData.user) {
           // Check if user already has a role in the database
-          const { data: existingRole } = await supabase
+          const { data: existingRole, error: roleError } = await supabase
             .from('user_roles')
             .select('role')
             .eq('user_id', authData.user.id)
-            .single();
+            .maybeSingle();
+
+          if (roleError) {
+            console.error("Error fetching existing role:", roleError);
+          }
           
           // If no role exists, insert the appropriate role
           if (!existingRole) {

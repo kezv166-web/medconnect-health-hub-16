@@ -24,22 +24,35 @@ const RoleProtectedRoute = ({ children, allowedRole }: RoleProtectedRouteProps) 
           return;
         }
 
-        // Fetch user's role from the backend
-        const { data: roleData } = await supabase
+        if (allowedRole === "patient") {
+          // For patient routes, only authentication is required
+          setIsAuthorized(true);
+          setIsChecking(false);
+          return;
+        }
+
+        // For doctor/hospital routes, check backend role
+        const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .single();
-        
-        const userRole = roleData?.role || 'patient'; // Default to patient if no role found
-        
-        // Check if user has the required role for this route
+          .maybeSingle();
+
+        if (roleError) {
+          console.error("Error fetching user role:", roleError);
+        }
+
+        const userRole = roleData?.role;
+
         if (userRole === allowedRole) {
           setIsAuthorized(true);
           setIsChecking(false);
-        } else {
+        } else if (userRole) {
           // Redirect to their correct dashboard based on their actual role
           navigate(`/${userRole}-dashboard`);
+        } else {
+          // No role found – send them to patient dashboard by default
+          navigate("/patient-dashboard");
         }
       } catch (error) {
         console.error("Error in role check:", error);
