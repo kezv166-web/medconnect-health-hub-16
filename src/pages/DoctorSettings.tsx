@@ -296,7 +296,7 @@ const DoctorSettings = () => {
             <Button 
               onClick={handleChangePassword} 
               disabled={changingPassword}
-              className="w-full sm:w-auto h-11 px-8 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md hover:shadow-lg transition-all duration-200"
+              className="w-full sm:w-auto h-11 px-8 bg-gradient-to-r from-success to-success/90 hover:from-success/90 hover:to-success shadow-md hover:shadow-lg transition-all duration-200"
             >
               <Lock className="w-4 h-4 mr-2" />
               {changingPassword ? "Updating Password..." : "Update Password"}
