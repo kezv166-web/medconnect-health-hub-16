@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { UserPlus, Send, Mail, Phone, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -51,6 +52,7 @@ const PatientConnect = () => {
     name: "",
     email: "",
     phone: "",
+    prescription: "",
   });
 
   const handleSendInvite = () => {
@@ -75,11 +77,11 @@ const PatientConnect = () => {
     setPatients([...patients, newPatient]);
     
     toast({
-      title: "Invitation Sent",
-      description: `Referral invitation sent to ${referralData.email || referralData.phone}`,
+      title: "Patient Added",
+      description: `${referralData.name || "Patient"} has been added successfully`,
     });
 
-    setReferralData({ name: "", email: "", phone: "" });
+    setReferralData({ name: "", email: "", phone: "", prescription: "" });
     setIsDialogOpen(false);
   };
 
@@ -90,14 +92,14 @@ const PatientConnect = () => {
         <DialogTrigger asChild>
           <Button>
             <UserPlus className="w-4 h-4 mr-2" />
-            Refer Patient
+            Add Patient
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Refer a Patient</DialogTitle>
+            <DialogTitle>Add a Patient</DialogTitle>
             <DialogDescription>
-              Send an invitation to connect a patient to the platform
+              Add patient details and prescription information
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -130,11 +132,21 @@ const PatientConnect = () => {
                 onChange={(e) => setReferralData({ ...referralData, phone: e.target.value })}
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="patient-prescription">Prescription</Label>
+              <Textarea
+                id="patient-prescription"
+                placeholder="Enter prescription details..."
+                value={referralData.prescription}
+                onChange={(e) => setReferralData({ ...referralData, prescription: e.target.value })}
+                className="min-h-[100px]"
+              />
+            </div>
           </div>
           <div className="flex gap-3">
             <Button onClick={handleSendInvite} className="flex-1">
-              <Send className="w-4 h-4 mr-2" />
-              Send Invitation
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add Patient
             </Button>
             <Button
               variant="outline"
