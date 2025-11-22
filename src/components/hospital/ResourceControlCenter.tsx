@@ -35,13 +35,27 @@ const ResourceControlCenter = () => {
   }, []);
 
   const fetchHospitalResources = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    // Get user ID (mock or real)
+    const mockRole = localStorage.getItem("mockRole");
+    let userId: string | null = null;
+    
+    if (mockRole === "hospital") {
+      userId = localStorage.getItem("mockHospitalUserId");
+      if (!userId) {
+        userId = `hospital_${crypto.randomUUID()}`;
+        localStorage.setItem("mockHospitalUserId", userId);
+      }
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id || null;
+    }
+    
+    if (!userId) return;
 
     const { data, error } = await supabase
       .from('hospital_profiles')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .maybeSingle();
 
     if (error) {
@@ -100,9 +114,19 @@ const ResourceControlCenter = () => {
 
   const handleSave = async () => {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
     
-    if (!user) {
+    // Get user ID (mock or real)
+    const mockRole = localStorage.getItem("mockRole");
+    let userId: string | null = null;
+    
+    if (mockRole === "hospital") {
+      userId = localStorage.getItem("mockHospitalUserId");
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id || null;
+    }
+    
+    if (!userId) {
       toast({
         title: "Error",
         description: "You must be logged in to update resources",
@@ -126,7 +150,7 @@ const ResourceControlCenter = () => {
         icu_beds_total: resources.totalICU,
         blood_bank_types: availableBloodTypes,
       })
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     setLoading(false);
 
