@@ -195,7 +195,8 @@ export default function TodayScheduleView() {
             takenAt,
             notes: null,
             sourceIntakeId: profile.id,
-            instruction: schedule.instruction
+            instruction: schedule.instruction,
+            isActualSchedule: true
           });
         });
       }
@@ -249,7 +250,8 @@ export default function TodayScheduleView() {
               takenAt: null,
               notes: null,
               sourceIntakeId: profile.id,
-              instruction: timing.includes("before") ? "before_food" : "after_food"
+              instruction: timing.includes("before") ? "before_food" : "after_food",
+              isActualSchedule: false
             });
           });
         });
