@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Home, User, Pill, MapPin, FileText, Menu, X, Activity, LogOut } from "lucide-react";
+import { Home, User, MapPin, FileText, Menu, X, Activity, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
-type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "form";
+type SidebarItem = "home" | "profile" | "nearby" | "form";
 
 interface PatientSidebarProps {
   activeTab: SidebarItem;
@@ -14,7 +14,6 @@ interface PatientSidebarProps {
 const navItems = [
   { id: "home" as const, icon: Home, label: "Home" },
   { id: "profile" as const, icon: User, label: "My Profile" },
-  { id: "medicines" as const, icon: Pill, label: "Medicines" },
   { id: "nearby" as const, icon: MapPin, label: "Nearby Services" },
   { id: "form" as const, icon: FileText, label: "Update Form" },
 ];
