@@ -81,6 +81,17 @@ const SecondaryAuthDialog = ({ open, onOpenChange, role, onSuccess }: SecondaryA
             console.error("Error fetching existing role:", roleError);
           }
           
+          // If a different role already exists, block cross-portal login
+          if (existingRole && existingRole.role !== role) {
+            setAuthError(
+              existingRole.role === 'hospital'
+                ? "This account is registered as Hospital Authority. Please use the Hospital portal."
+                : "This account is registered as Doctor. Please use the Doctor portal."
+            );
+            await supabase.auth.signOut();
+            return;
+          }
+          
           // If no role exists, insert the appropriate role
           if (!existingRole) {
             await supabase.from('user_roles').insert({
@@ -117,6 +128,17 @@ const SecondaryAuthDialog = ({ open, onOpenChange, role, onSuccess }: SecondaryA
 
           if (roleError) {
             console.error("Error fetching existing role:", roleError);
+          }
+          
+          // If a different role already exists, block cross-portal signup
+          if (existingRole && existingRole.role !== role) {
+            setAuthError(
+              existingRole.role === 'hospital'
+                ? "This email is already registered as Hospital Authority. Please use the Hospital portal."
+                : "This email is already registered as Doctor. Please use the Doctor portal."
+            );
+            await supabase.auth.signOut();
+            return;
           }
           
           // If no role exists, insert the appropriate role
