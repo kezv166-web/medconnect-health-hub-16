@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import ResourceControlCenter from "@/components/hospital/ResourceControlCenter";
 import DoctorRoster from "@/components/hospital/DoctorRoster";
 import HospitalRegistration from "@/components/hospital/HospitalRegistration";
+import HospitalSettings from "@/pages/HospitalSettings";
 import { supabase } from "@/integrations/supabase/client";
 
 type TabType = "profile" | "resources" | "roster" | "settings";
@@ -232,8 +233,7 @@ const HospitalDashboard = () => {
 
           {activeTab === "settings" && (
             <div className="animate-fade-in">
-              <h1 className="text-3xl font-bold text-foreground mb-4">Settings</h1>
-              <p className="text-muted-foreground">Settings coming soon...</p>
+              <HospitalSettings />
             </div>
           )}
         </div>
