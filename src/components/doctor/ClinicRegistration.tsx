@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 const ClinicRegistration = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
   const [clinicData, setClinicData] = useState({
     name: "",
     address: "",
@@ -42,6 +44,7 @@ const ClinicRegistration = () => {
     }
 
     if (data) {
+      setHasProfile(true);
       setClinicData({
         name: data.name,
         address: data.address,
@@ -51,6 +54,8 @@ const ClinicRegistration = () => {
         hours: data.operating_hours,
         description: data.description || '',
       });
+    } else {
+      setIsEditing(true);
     }
   };
 
@@ -104,52 +109,123 @@ const ClinicRegistration = () => {
       return;
     }
 
+    setHasProfile(true);
+    setIsEditing(false);
     toast({
-      title: "Clinic Updated",
-      description: "Your clinic information has been saved successfully and is now visible in the nearby services",
+      title: hasProfile ? "Clinic Updated" : "Clinic Registered",
+      description: hasProfile 
+        ? "Your clinic information has been updated successfully"
+        : "Your clinic has been registered successfully and is now visible in the nearby services",
     });
   };
 
+  // Show profile view if profile exists and not editing
+  if (hasProfile && !isEditing) {
+    return (
+      <div className="space-y-6">
+        {/* Clinic Profile Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground">Clinic Profile</h2>
+            <p className="text-muted-foreground mt-1">Your clinic information</p>
+          </div>
+          <Button onClick={() => setIsEditing(true)} variant="outline">
+            <Save className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
+        </div>
+
+        {/* Clinic Profile Card */}
+        <Card className="border-success/20 bg-success/5">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-success/10 rounded-xl">
+                <Building2 className="w-6 h-6 text-success" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-lg font-semibold text-foreground">{clinicData.name}</h3>
+                  <Badge variant="default" className="bg-success">
+                    Active
+                  </Badge>
+                </div>
+                <div className="space-y-1 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{clinicData.address}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    <span>{clinicData.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>{clinicData.hours}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Detailed Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Clinic Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label className="text-muted-foreground">Clinic Name</Label>
+                <p className="text-foreground font-medium mt-1">{clinicData.name}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Phone Number</Label>
+                <p className="text-foreground font-medium mt-1">{clinicData.phone}</p>
+              </div>
+              <div className="md:col-span-2">
+                <Label className="text-muted-foreground">Address</Label>
+                <p className="text-foreground font-medium mt-1">{clinicData.address}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Specialties</Label>
+                <p className="text-foreground font-medium mt-1">{clinicData.specialties || 'Not specified'}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Operating Hours</Label>
+                <p className="text-foreground font-medium mt-1">{clinicData.hours}</p>
+              </div>
+              <div className="md:col-span-2">
+                <Label className="text-muted-foreground">Description</Label>
+                <p className="text-foreground font-medium mt-1">{clinicData.description || 'No description provided'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show registration/edit form
   return (
     <div className="space-y-6">
-      {/* Current Clinic Status */}
-      <Card className="border-success/20 bg-success/5">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-success/10 rounded-xl">
-              <Building2 className="w-6 h-6 text-success" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-lg font-semibold text-foreground">{clinicData.name}</h3>
-                <Badge variant="default" className="bg-success">
-                  Active
-                </Badge>
-              </div>
-              <div className="space-y-1 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>{clinicData.address}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
-                  <span>{clinicData.phone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  <span>{clinicData.hours}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Form Header */}
+      <div>
+        <h2 className="text-3xl font-bold text-foreground">
+          {hasProfile ? 'Edit Clinic Profile' : 'Register Your Clinic'}
+        </h2>
+        <p className="text-muted-foreground mt-1">
+          {hasProfile ? 'Update your clinic information' : 'Complete your clinic registration to get started'}
+        </p>
+      </div>
 
       {/* Clinic Details Form */}
       <Card>
         <CardHeader>
-          <CardTitle>Clinic Information</CardTitle>
-          <CardDescription>Update your clinic details and practice information</CardDescription>
+          <CardTitle>{hasProfile ? 'Update' : 'Enter'} Clinic Information</CardTitle>
+          <CardDescription>
+            {hasProfile ? 'Update your clinic details and practice information' : 'Fill in your clinic details to complete registration'}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Basic Information */}
@@ -234,11 +310,16 @@ const ClinicRegistration = () => {
             </div>
           </div>
 
-          {/* Save Button */}
-          <div className="flex justify-end pt-4 border-t border-border">
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            {hasProfile && (
+              <Button onClick={() => setIsEditing(false)} variant="outline" size="lg" disabled={loading}>
+                Cancel
+              </Button>
+            )}
             <Button onClick={handleSave} size="lg" className="min-w-[200px]" disabled={loading}>
               <Save className="w-4 h-4 mr-2" />
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? "Saving..." : hasProfile ? "Save Changes" : "Register Clinic"}
             </Button>
           </div>
         </CardContent>
