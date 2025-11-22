@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { UserPlus, Send, Mail, Phone, Calendar } from "lucide-react";
+import { UserPlus, Send, Mail, Phone, Calendar, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Patient {
@@ -52,8 +52,8 @@ const PatientConnect = () => {
     name: "",
     email: "",
     phone: "",
-    prescription: "",
   });
+  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
 
   const handleSendInvite = () => {
     if (!referralData.email && !referralData.phone) {
@@ -81,7 +81,8 @@ const PatientConnect = () => {
       description: `${referralData.name || "Patient"} has been added successfully`,
     });
 
-    setReferralData({ name: "", email: "", phone: "", prescription: "" });
+    setReferralData({ name: "", email: "", phone: "" });
+    setPrescriptionFile(null);
     setIsDialogOpen(false);
   };
 
@@ -134,13 +135,21 @@ const PatientConnect = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="patient-prescription">Prescription</Label>
-              <Textarea
-                id="patient-prescription"
-                placeholder="Enter prescription details..."
-                value={referralData.prescription}
-                onChange={(e) => setReferralData({ ...referralData, prescription: e.target.value })}
-                className="min-h-[100px]"
-              />
+              <div className="border-2 border-dashed border-input rounded-md p-6 text-center hover:border-primary/50 transition-colors">
+                <input
+                  id="patient-prescription"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setPrescriptionFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                />
+                <label htmlFor="patient-prescription" className="cursor-pointer">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    {prescriptionFile ? prescriptionFile.name : "Click to upload prescription image"}
+                  </p>
+                </label>
+              </div>
             </div>
           </div>
           <div className="flex gap-3">
