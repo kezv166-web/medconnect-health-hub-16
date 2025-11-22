@@ -184,8 +184,8 @@ const HealthChatWindow = ({ onClose }: HealthChatWindowProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-fade-in">
-      <div className="bg-card border border-border rounded-t-2xl sm:rounded-2xl w-full max-w-2xl h-[600px] flex flex-col shadow-2xl animate-slide-up">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-2 sm:p-4 animate-fade-in">
+      <div className="bg-card border border-border rounded-t-2xl sm:rounded-2xl w-full max-w-lg h-[85vh] sm:h-[600px] max-h-[600px] flex flex-col shadow-2xl animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
