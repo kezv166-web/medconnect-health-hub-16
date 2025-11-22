@@ -60,6 +60,13 @@ const PatientConnect = () => {
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
   const [lastVisitDate, setLastVisitDate] = useState<Date>();
   const [viewingPatient, setViewingPatient] = useState<Patient | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editData, setEditData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    lastVisit: new Date(),
+  });
 
   const handleSendInvite = () => {
     if (!referralData.email && !referralData.phone) {
@@ -249,7 +256,10 @@ const PatientConnect = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => setViewingPatient(patient)}
+                      onClick={() => {
+                        setViewingPatient(patient);
+                        setIsEditMode(false);
+                      }}
                     >
                       View Record
                     </Button>
@@ -300,16 +310,43 @@ const PatientConnect = () => {
 
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Last Visit</Label>
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="w-4 h-4 text-muted-foreground" />
-                    <p className="text-sm">
-                      {new Date(viewingPatient.lastVisit).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
+                  {isEditMode ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !editData.lastVisit && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {editData.lastVisit ? format(editData.lastVisit, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={editData.lastVisit}
+                          onSelect={(date) => date && setEditData({ ...editData, lastVisit: date })}
+                          disabled={(date) => date > new Date()}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-sm">
+                        {new Date(viewingPatient.lastVisit).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Prescription Image */}
@@ -326,16 +363,71 @@ const PatientConnect = () => {
 
               {/* Actions */}
               <div className="flex gap-3 pt-4 border-t">
-                <Button className="flex-1">
-                  Edit Record
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setViewingPatient(null)}
-                  className="flex-1"
-                >
-                  Close
-                </Button>
+                {isEditMode ? (
+                  <>
+                    <Button 
+                      className="flex-1"
+                      onClick={() => {
+                        setPatients(patients.map(p => 
+                          p.id === viewingPatient.id 
+                            ? { 
+                                ...p, 
+                                name: editData.name,
+                                email: editData.email,
+                                phone: editData.phone,
+                                lastVisit: editData.lastVisit.toISOString().split('T')[0]
+                              } 
+                            : p
+                        ));
+                        setViewingPatient({
+                          ...viewingPatient,
+                          name: editData.name,
+                          email: editData.email,
+                          phone: editData.phone,
+                          lastVisit: editData.lastVisit.toISOString().split('T')[0]
+                        });
+                        setIsEditMode(false);
+                        toast({
+                          title: "Record Updated",
+                          description: "Patient record has been updated successfully",
+                        });
+                      }}
+                    >
+                      Save Changes
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsEditMode(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      className="flex-1"
+                      onClick={() => {
+                        setIsEditMode(true);
+                        setEditData({
+                          name: viewingPatient.name,
+                          email: viewingPatient.email,
+                          phone: viewingPatient.phone,
+                          lastVisit: new Date(viewingPatient.lastVisit)
+                        });
+                      }}
+                    >
+                      Edit Record
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setViewingPatient(null)}
+                      className="flex-1"
+                    >
+                      Close
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           )}
