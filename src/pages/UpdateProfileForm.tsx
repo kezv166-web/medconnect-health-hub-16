@@ -30,6 +30,7 @@ const profileSchema = z.object({
   phone_number: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format"),
   email: z.string().email("Invalid email address"),
   age: z.number().min(1, "Age must be at least 1").max(120, "Age must be less than 120"),
+  blood_group: z.string().optional(),
   primary_health_condition: z.string().min(2, "Please specify your primary health condition"),
   doctor_name: z.string().min(2, "Doctor name is required"),
   specialty: z.string().min(2, "Specialty is required"),
@@ -55,6 +56,7 @@ const UpdateProfileForm = () => {
       phone_number: "",
       email: "",
       age: 0,
+      blood_group: "",
       primary_health_condition: "",
       doctor_name: "",
       specialty: "",
@@ -90,6 +92,7 @@ const UpdateProfileForm = () => {
           phone_number: profile.phone_number,
           email: profile.email,
           age: profile.age,
+          blood_group: profile.blood_group || "",
           primary_health_condition: profile.primary_health_condition,
           doctor_name: profile.doctor_name,
           specialty: profile.specialty,
@@ -135,6 +138,7 @@ const UpdateProfileForm = () => {
           full_name: data.full_name,
           phone_number: data.phone_number,
           age: data.age,
+          blood_group: data.blood_group,
           primary_health_condition: data.primary_health_condition,
           doctor_name: data.doctor_name,
           specialty: data.specialty,
@@ -277,6 +281,28 @@ const UpdateProfileForm = () => {
                 {form.formState.errors.age && (
                   <p className="text-sm text-destructive">{form.formState.errors.age.message}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="blood_group">Blood Group</Label>
+                <Select 
+                  value={form.watch("blood_group")} 
+                  onValueChange={(value) => form.setValue("blood_group", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select blood group" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    <SelectItem value="A+">A+</SelectItem>
+                    <SelectItem value="A-">A-</SelectItem>
+                    <SelectItem value="B+">B+</SelectItem>
+                    <SelectItem value="B-">B-</SelectItem>
+                    <SelectItem value="AB+">AB+</SelectItem>
+                    <SelectItem value="AB-">AB-</SelectItem>
+                    <SelectItem value="O+">O+</SelectItem>
+                    <SelectItem value="O-">O-</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2 md:col-span-2">
