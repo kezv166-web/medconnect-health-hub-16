@@ -70,7 +70,17 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
           });
 
           if (error) {
-            setAuthError(error.message.includes("Invalid login") ? "Invalid email or password" : error.message);
+            const errorMsg = error.message.toLowerCase();
+            if (errorMsg.includes('invalid') || 
+                errorMsg.includes('not found') ||
+                errorMsg.includes('no user') ||
+                errorMsg.includes('wrong password')) {
+              setAuthError("Email not registered or incorrect password. Please check your credentials or sign up.");
+            } else if (errorMsg.includes('email not confirmed')) {
+              setAuthError("Please verify your email address before logging in.");
+            } else {
+              setAuthError(error.message);
+            }
             return;
           }
 
@@ -205,6 +215,9 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
                 >
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Don't have an account? Switch to the <span className="font-semibold text-primary">Sign Up</span> tab above.
+                </p>
               </form>
             </TabsContent>
 
