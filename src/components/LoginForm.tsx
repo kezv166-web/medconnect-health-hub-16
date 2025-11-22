@@ -97,19 +97,41 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
           }
         }
       } else {
-        // Mock authentication for doctor and hospital roles (not implemented yet)
+        // Strict credential check for doctor and hospital roles (mock portal access)
+        const isDoctor = role === "doctor";
+        const isHospital = role === "hospital";
+
+        const validDoctorEmail = "doctor12@gmail.com";
+        const validDoctorPassword = "doctor@123/";
+        const validHospitalEmail = "hospitals01@gmail.com";
+        const validHospitalPassword = "hospitals@123/";
+
+        if (
+          (isDoctor && (data.email !== validDoctorEmail || data.password !== validDoctorPassword)) ||
+          (isHospital && (data.email !== validHospitalEmail || data.password !== validHospitalPassword))
+        ) {
+          setAuthError("Invalid email or password for this portal.");
+          toast({
+            title: "Access denied",
+            description: "Please check your email and password and try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Mock successful login for allowed credentials
         setTimeout(() => {
           toast({
-            title: mode === "login" ? "Login Successful" : "Account Created",
+            title: mode === "login" ? "Login Successful" : "Access Granted",
             description: `Welcome to ${getRoleTitle()} Portal!`,
           });
-          
+
           if (role === "doctor") {
             navigate("/doctor-dashboard");
           } else if (role === "hospital") {
             navigate("/hospital-dashboard");
           }
-        }, 1500);
+        }, 600);
       }
     } catch (error: any) {
       console.error("Auth error:", error);
