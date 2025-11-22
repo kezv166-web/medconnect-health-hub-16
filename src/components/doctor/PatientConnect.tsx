@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { UserPlus, Send, Mail, Phone, Calendar, Upload } from "lucide-react";
+import { UserPlus, Send, Mail, Phone, CalendarIcon, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Patient {
@@ -54,6 +58,7 @@ const PatientConnect = () => {
     phone: "",
   });
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
+  const [lastVisitDate, setLastVisitDate] = useState<Date>();
 
   const handleSendInvite = () => {
     if (!referralData.email && !referralData.phone) {
@@ -70,7 +75,7 @@ const PatientConnect = () => {
       name: referralData.name || "New Patient",
       email: referralData.email,
       phone: referralData.phone,
-      lastVisit: new Date().toISOString().split('T')[0],
+      lastVisit: lastVisitDate ? lastVisitDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       status: "active",
     };
 
@@ -83,6 +88,7 @@ const PatientConnect = () => {
 
     setReferralData({ name: "", email: "", phone: "" });
     setPrescriptionFile(null);
+    setLastVisitDate(undefined);
     setIsDialogOpen(false);
   };
 
@@ -151,6 +157,33 @@ const PatientConnect = () => {
                 </label>
               </div>
             </div>
+            <div className="space-y-2">
+              <Label>Last Visit</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !lastVisitDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {lastVisitDate ? format(lastVisitDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={lastVisitDate}
+                    onSelect={setLastVisitDate}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           <div className="flex gap-3">
             <Button onClick={handleSendInvite} className="flex-1">
@@ -202,7 +235,7 @@ const PatientConnect = () => {
                         <span>{patient.phone}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
+                        <CalendarIcon className="w-4 h-4" />
                         <span>
                           Last Visit: {new Date(patient.lastVisit).toLocaleDateString()}
                         </span>
