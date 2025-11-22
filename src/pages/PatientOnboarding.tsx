@@ -447,11 +447,11 @@ const PatientOnboarding = () => {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal transition-all duration-300 hover:bg-accent hover:border-primary/50",
                             !form.watch("last_consultation_date") && "text-muted-foreground"
                           )}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          <CalendarIcon className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                           {form.watch("last_consultation_date") ? (
                             format(form.watch("last_consultation_date"), "PPP")
                           ) : (
@@ -459,14 +459,14 @@ const PatientOnboarding = () => {
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0 animate-scale-in" align="start">
                         <Calendar
                           mode="single"
                           selected={form.watch("last_consultation_date")}
                           onSelect={(date) => form.setValue("last_consultation_date", date!)}
                           disabled={(date) => date > new Date()}
                           initialFocus
-                          className="pointer-events-auto"
+                          className="pointer-events-auto transition-all duration-200"
                         />
                       </PopoverContent>
                     </Popover>
@@ -484,11 +484,11 @@ const PatientOnboarding = () => {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal transition-all duration-300 hover:bg-accent hover:border-primary/50",
                             !form.watch("next_follow_up_date") && "text-muted-foreground"
                           )}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          <CalendarIcon className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                           {form.watch("next_follow_up_date") ? (
                             format(form.watch("next_follow_up_date"), "PPP")
                           ) : (
@@ -496,14 +496,14 @@ const PatientOnboarding = () => {
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0 animate-scale-in" align="start">
                         <Calendar
                           mode="single"
                           selected={form.watch("next_follow_up_date")}
                           onSelect={(date) => form.setValue("next_follow_up_date", date!)}
                           disabled={(date) => date < new Date()}
                           initialFocus
-                          className="pointer-events-auto"
+                          className="pointer-events-auto transition-all duration-200"
                         />
                       </PopoverContent>
                     </Popover>
