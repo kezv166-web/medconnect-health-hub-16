@@ -46,9 +46,9 @@ const PatientDashboard = () => {
       {/* Floating AI Chat Button */}
       <FloatingChatButton />
       
-      <main className="flex-1 lg:ml-64">
+      <main className="flex-1 lg:ml-64 overflow-x-hidden">
         {activeTab === "home" && (
-          <div className="p-6 space-y-6 animate-fade-in">
+          <div className="p-6 space-y-6 animate-fade-in max-w-full overflow-x-hidden">
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-foreground mb-2">
