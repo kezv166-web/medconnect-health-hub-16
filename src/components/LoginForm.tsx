@@ -103,7 +103,7 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
 
         const validDoctorEmail = "doctor12@gmail.com";
         const validDoctorPassword = "doctor@123/";
-        const validHospitalEmail = "hospitals01@gmail.com";
+        const validHospitalEmail = "hospitals@gmail.com";
         const validHospitalPassword = "hospitals@123/";
 
         if (
