@@ -361,25 +361,27 @@ export default function TodayScheduleView() {
             </div>
 
             {/* Cards in carousel */}
-            <Carousel className="w-full" opts={{ align: "start" }}>
-              <CarouselContent className="-ml-4">
-                {daypart.occurrences.map((occurrence) => (
-                  <CarouselItem key={occurrence.occurrenceId} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                    <TodayScheduleCard
-                      occurrence={occurrence}
-                      onMarkTaken={handleMarkTaken}
-                      isSubmitting={submittingId === occurrence.occurrenceId}
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              {daypart.occurrences.length > 1 && (
-                <>
-                  <CarouselPrevious className="left-0" />
-                  <CarouselNext className="right-0" />
-                </>
-              )}
-            </Carousel>
+            <div className="relative px-12">
+              <Carousel className="w-full" opts={{ align: "start" }}>
+                <CarouselContent className="-ml-4">
+                  {daypart.occurrences.map((occurrence) => (
+                    <CarouselItem key={occurrence.occurrenceId} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                      <TodayScheduleCard
+                        occurrence={occurrence}
+                        onMarkTaken={handleMarkTaken}
+                        isSubmitting={submittingId === occurrence.occurrenceId}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {daypart.occurrences.length > 1 && (
+                  <>
+                    <CarouselPrevious className="-left-12" />
+                    <CarouselNext className="-right-12" />
+                  </>
+                )}
+              </Carousel>
+            </div>
           </div>
         );
       })}
