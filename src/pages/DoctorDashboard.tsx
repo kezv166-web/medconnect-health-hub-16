@@ -11,16 +11,28 @@ const DoctorDashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>("clinic");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [clinicName, setClinicName] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndClinic = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.email) {
         setUserEmail(user.email);
+        
+        // Fetch clinic profile
+        const { data: hospitalProfile } = await supabase
+          .from('hospital_profiles')
+          .select('name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (hospitalProfile?.name) {
+          setClinicName(hospitalProfile.name);
+        }
       }
     };
-    fetchUser();
+    fetchUserAndClinic();
   }, []);
   const navItems = [{
     id: "clinic" as const,
@@ -78,7 +90,7 @@ const DoctorDashboard = () => {
         <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
           <div className="px-4 py-3 bg-success/10 rounded-lg border border-success/20">
             <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
-            <p className="font-semibold text-foreground">{userEmail || "Doctor"}</p>
+            <p className="font-semibold text-foreground">{clinicName || userEmail || "Doctor"}</p>
             <p className="text-xs text-muted-foreground">Medical Doctor</p>
           </div>
           <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={() => navigate("/")}>
