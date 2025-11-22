@@ -27,6 +27,7 @@ interface Patient {
   phone: string;
   lastVisit: string;
   status: "active" | "pending";
+  prescriptionUrl?: string;
 }
 
 const initialPatients: Patient[] = [
@@ -79,6 +80,11 @@ const PatientConnect = () => {
       return;
     }
 
+    let prescriptionUrl = "";
+    if (prescriptionFile) {
+      prescriptionUrl = URL.createObjectURL(prescriptionFile);
+    }
+
     const newPatient: Patient = {
       id: Date.now().toString(),
       name: referralData.name || "New Patient",
@@ -86,6 +92,7 @@ const PatientConnect = () => {
       phone: referralData.phone,
       lastVisit: lastVisitDate ? lastVisitDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       status: "active",
+      prescriptionUrl,
     };
 
     setPatients([...patients, newPatient]);
@@ -173,7 +180,7 @@ const PatientConnect = () => {
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal",
+                      "w-full justify-start text-left font-normal hover:bg-background hover:text-foreground",
                       !lastVisitDate && "text-muted-foreground"
                     )}
                   >
@@ -278,7 +285,7 @@ const PatientConnect = () => {
         setIsEditMode(false);
         setEditPrescriptionFile(null);
       }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{isEditMode ? "Edit Patient Record" : "Patient Record"}</DialogTitle>
             <DialogDescription>
@@ -347,7 +354,7 @@ const PatientConnect = () => {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal hover:bg-background hover:text-foreground",
                             !editData.lastVisit && "text-muted-foreground"
                           )}
                         >
@@ -400,11 +407,21 @@ const PatientConnect = () => {
                       </label>
                     </div>
                   ) : (
-                    <div className="border rounded-lg p-4 bg-muted/30">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Upload className="w-4 h-4" />
-                        <span>Prescription image will be displayed here</span>
-                      </div>
+                    <div className="border rounded-lg overflow-hidden bg-muted/30">
+                      {viewingPatient.prescriptionUrl ? (
+                        <img 
+                          src={viewingPatient.prescriptionUrl} 
+                          alt="Prescription" 
+                          className="w-full h-auto"
+                        />
+                      ) : (
+                        <div className="p-4">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Upload className="w-4 h-4" />
+                            <span>No prescription uploaded</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -417,24 +434,24 @@ const PatientConnect = () => {
                     <Button 
                       className="flex-1"
                       onClick={() => {
-                        setPatients(patients.map(p => 
-                          p.id === viewingPatient.id 
-                            ? { 
-                                ...p, 
-                                name: editData.name,
-                                email: editData.email,
-                                phone: editData.phone,
-                                lastVisit: editData.lastVisit.toISOString().split('T')[0]
-                              } 
-                            : p
-                        ));
-                        setViewingPatient({
+                        let newPrescriptionUrl = viewingPatient.prescriptionUrl;
+                        if (editPrescriptionFile) {
+                          newPrescriptionUrl = URL.createObjectURL(editPrescriptionFile);
+                        }
+
+                        const updatedPatient = {
                           ...viewingPatient,
                           name: editData.name,
                           email: editData.email,
                           phone: editData.phone,
-                          lastVisit: editData.lastVisit.toISOString().split('T')[0]
-                        });
+                          lastVisit: editData.lastVisit.toISOString().split('T')[0],
+                          prescriptionUrl: newPrescriptionUrl
+                        };
+
+                        setPatients(patients.map(p => 
+                          p.id === viewingPatient.id ? updatedPatient : p
+                        ));
+                        setViewingPatient(updatedPatient);
                         setIsEditMode(false);
                         toast({
                           title: "Record Updated",
