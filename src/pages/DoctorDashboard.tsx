@@ -1,15 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Stethoscope, Building2, Users, Settings, LogOut, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import ClinicRegistration from "@/components/doctor/ClinicRegistration";
 import PatientConnect from "@/components/doctor/PatientConnect";
+import { supabase } from "@/integrations/supabase/client";
 type TabType = "clinic" | "patients" | "settings";
 const DoctorDashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>("clinic");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    };
+    fetchUser();
+  }, []);
   const navItems = [{
     id: "clinic" as const,
     icon: Building2,
@@ -66,7 +78,7 @@ const DoctorDashboard = () => {
         <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
           <div className="px-4 py-3 bg-success/10 rounded-lg border border-success/20">
             <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
-            <p className="font-semibold text-foreground">Dr. Sarah Johnson</p>
+            <p className="font-semibold text-foreground">{userEmail || "Doctor"}</p>
             <p className="text-xs text-muted-foreground">Medical Doctor</p>
           </div>
           <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={() => navigate("/")}>
