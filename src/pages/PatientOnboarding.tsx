@@ -479,24 +479,9 @@ const PatientOnboarding = () => {
                         </Label>
                         <div className="flex gap-3">
                           <div className="relative flex-1">
-                            <Input 
-                              id={`medicines.${index}.time`} 
-                              {...form.register(`medicines.${index}.time`)} 
-                              placeholder="09:00" 
-                              type="time" 
-                              className="h-11 text-base font-medium transition-all duration-200 hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20" 
-                            />
+                            <Input id={`medicines.${index}.time`} {...form.register(`medicines.${index}.time`)} placeholder="09:00" type="time" className="h-11 text-base font-medium transition-all duration-200 hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20" />
                           </div>
-                          <Input
-                            {...form.register(`medicines.${index}.period`)}
-                            placeholder="AM"
-                            maxLength={2}
-                            className="w-24 h-11 text-center uppercase text-base font-semibold transition-all duration-200 hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                            onChange={(e) => {
-                              const value = e.target.value.toUpperCase();
-                              form.setValue(`medicines.${index}.period`, value as "AM" | "PM");
-                            }}
-                          />
+                          
                         </div>
                         {form.formState.errors.medicines?.[index]?.time && <p className="text-sm text-destructive mt-1">
                             {form.formState.errors.medicines[index]?.time?.message}
