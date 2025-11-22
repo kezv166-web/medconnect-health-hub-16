@@ -654,20 +654,16 @@ const PatientOnboarding = () => {
                               className="transition-all duration-200 hover:border-primary/50 focus:border-primary pr-2"
                             />
                           </div>
-                          <Select
-                            value={form.watch(`medicines.${index}.period`)}
-                            onValueChange={(value) =>
-                              form.setValue(`medicines.${index}.period`, value as "AM" | "PM")
-                            }
-                          >
-                            <SelectTrigger className="w-24 transition-all duration-200 hover:border-primary/50 font-medium">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-background z-50">
-                              <SelectItem value="AM" className="font-medium">AM</SelectItem>
-                              <SelectItem value="PM" className="font-medium">PM</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Input
+                            {...form.register(`medicines.${index}.period`)}
+                            placeholder="AM/PM"
+                            maxLength={2}
+                            className="w-24 transition-all duration-200 hover:border-primary/50 focus:border-primary font-medium uppercase text-center"
+                            onChange={(e) => {
+                              const value = e.target.value.toUpperCase();
+                              form.setValue(`medicines.${index}.period`, value as "AM" | "PM");
+                            }}
+                          />
                         </div>
                         {form.formState.errors.medicines?.[index]?.time && (
                           <p className="text-sm text-destructive">
