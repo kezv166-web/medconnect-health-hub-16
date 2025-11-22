@@ -17,6 +17,26 @@ export default function AdherenceAreaChart() {
 
   useEffect(() => {
     fetchAdherenceData();
+    
+    // Set up real-time subscription for intake_logs changes
+    const channel = supabase
+      .channel('adherence-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'intake_logs'
+        },
+        () => {
+          fetchAdherenceData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchAdherenceData = async () => {
