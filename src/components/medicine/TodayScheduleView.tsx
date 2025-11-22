@@ -6,6 +6,7 @@ import TodayScheduleCard, { MedicineOccurrence, OccurrenceStatus } from "./Today
 import { useMedicineNotifications } from "@/hooks/useMedicineNotifications";
 import { Sunrise, Sun, Sunset, Moon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface DaypartConfig {
   value: "Morning" | "Afternoon" | "Evening" | "Night";
@@ -359,18 +360,26 @@ export default function TodayScheduleView() {
               </div>
             </div>
 
-            {/* Cards in horizontal scroll */}
-            <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
-              {daypart.occurrences.map((occurrence) => (
-                <div key={occurrence.occurrenceId} className="flex-shrink-0 w-80 snap-start">
-                  <TodayScheduleCard
-                    occurrence={occurrence}
-                    onMarkTaken={handleMarkTaken}
-                    isSubmitting={submittingId === occurrence.occurrenceId}
-                  />
-                </div>
-              ))}
-            </div>
+            {/* Cards in carousel */}
+            <Carousel className="w-full" opts={{ align: "start" }}>
+              <CarouselContent className="-ml-4">
+                {daypart.occurrences.map((occurrence) => (
+                  <CarouselItem key={occurrence.occurrenceId} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                    <TodayScheduleCard
+                      occurrence={occurrence}
+                      onMarkTaken={handleMarkTaken}
+                      isSubmitting={submittingId === occurrence.occurrenceId}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {daypart.occurrences.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-0" />
+                  <CarouselNext className="right-0" />
+                </>
+              )}
+            </Carousel>
           </div>
         );
       })}
