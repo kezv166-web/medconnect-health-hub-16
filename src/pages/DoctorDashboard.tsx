@@ -93,8 +93,8 @@ const DoctorDashboard = () => {
             <p className="font-semibold text-foreground">{clinicName || userEmail || "Doctor"}</p>
             <p className="text-xs text-muted-foreground">Medical Doctor</p>
           </div>
-          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={() => {
-            sessionStorage.removeItem("mockRole");
+          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={async () => {
+            await supabase.auth.signOut();
             navigate("/");
           }}>
             <LogOut className="w-4 h-4 mr-2" />
