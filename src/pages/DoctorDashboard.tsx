@@ -93,7 +93,10 @@ const DoctorDashboard = () => {
             <p className="font-semibold text-foreground">{clinicName || userEmail || "Doctor"}</p>
             <p className="text-xs text-muted-foreground">Medical Doctor</p>
           </div>
-          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={() => navigate("/")}>
+          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={() => {
+            sessionStorage.removeItem("mockRole");
+            navigate("/");
+          }}>
             <LogOut className="w-4 h-4 mr-2" />
             Logout
           </Button>

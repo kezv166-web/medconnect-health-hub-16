@@ -75,6 +75,8 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
           }
 
           if (authData.user) {
+            // Clear any mock role from sessionStorage to prevent cross-contamination
+            sessionStorage.removeItem("mockRole");
             toast({ title: "Welcome back!", description: "You've successfully logged in." });
             navigate("/patient-dashboard");
           }
@@ -92,6 +94,8 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
           }
 
           if (authData.user) {
+            // Clear any mock role from sessionStorage to prevent cross-contamination
+            sessionStorage.removeItem("mockRole");
             toast({ title: "Account created!", description: "Welcome to MedConnect." });
             navigate("/patient-onboarding");
           }
