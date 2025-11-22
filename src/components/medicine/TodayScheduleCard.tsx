@@ -19,6 +19,7 @@ export interface MedicineOccurrence {
   notes: string | null;
   sourceIntakeId: string;
   instruction?: string;
+  isActualSchedule?: boolean;
 }
 
 interface TodayScheduleCardProps {
@@ -65,6 +66,16 @@ export default function TodayScheduleCard({
   };
 
   const getButtonState = () => {
+    // Disable if not an actual schedule from database
+    if (occurrence.isActualSchedule === false) {
+      return {
+        label: "Not scheduled",
+        disabled: true,
+        variant: "outline" as const,
+        className: "cursor-not-allowed opacity-50"
+      };
+    }
+
     if (occurrence.status === "Taken") {
       return {
         label: "✓ Medicine taken",
@@ -76,7 +87,7 @@ export default function TodayScheduleCard({
     
     if (occurrence.status === "Due") {
       return {
-        label: "Medicine taken",
+        label: "Mark as taken",
         disabled: false,
         variant: "default" as const,
         className: "bg-primary hover:bg-primary-dark text-primary-foreground"
