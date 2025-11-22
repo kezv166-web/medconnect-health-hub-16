@@ -34,24 +34,10 @@ const HospitalRegistration = () => {
   const fetchHospitalProfile = async () => {
     setInitialLoading(true);
     
-    // Check for mock hospital auth
-    const mockRole = localStorage.getItem("mockRole");
-    let userId: string | null = null;
+    // Use real Supabase auth only
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (mockRole === "hospital") {
-      // For mock hospital auth, use or create a persistent hospital user ID
-      userId = localStorage.getItem("mockHospitalUserId");
-      if (!userId) {
-        userId = `hospital_${crypto.randomUUID()}`;
-        localStorage.setItem("mockHospitalUserId", userId);
-      }
-    } else {
-      // For real auth (patients), use Supabase user
-      const { data: { user } } = await supabase.auth.getUser();
-      userId = user?.id || null;
-    }
-    
-    if (!userId) {
+    if (!user) {
       setInitialLoading(false);
       return;
     }
@@ -59,7 +45,7 @@ const HospitalRegistration = () => {
     const { data, error } = await supabase
       .from('hospital_profiles')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .maybeSingle();
 
     if (error) {
@@ -100,22 +86,10 @@ const HospitalRegistration = () => {
 
     setLoading(true);
     
-    // Get user ID (mock or real)
-    const mockRole = localStorage.getItem("mockRole");
-    let userId: string | null = null;
+    // Use real Supabase auth only
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (mockRole === "hospital") {
-      userId = localStorage.getItem("mockHospitalUserId");
-      if (!userId) {
-        userId = `hospital_${crypto.randomUUID()}`;
-        localStorage.setItem("mockHospitalUserId", userId);
-      }
-    } else {
-      const { data: { user } } = await supabase.auth.getUser();
-      userId = user?.id || null;
-    }
-    
-    if (!userId) {
+    if (!user) {
       toast({
         title: "Error",
         description: "You must be logged in",
@@ -133,7 +107,7 @@ const HospitalRegistration = () => {
     const { error } = await supabase
       .from('hospital_profiles')
       .upsert({
-        user_id: userId,
+        user_id: user.id,
         name: hospitalData.name,
         address: hospitalData.address,
         phone: hospitalData.phone,
