@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,27 +6,80 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Droplet, Bed, Activity, Save, Plus, Minus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const bloodTypes = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
 const ResourceControlCenter = () => {
   const { toast } = useToast();
   const [resources, setResources] = useState({
-    oxygenCylinders: 15,
-    totalOxygen: 20,
-    icuBeds: 3,
-    totalICU: 12,
+    oxygenCylinders: 0,
+    totalOxygen: 0,
+    icuBeds: 0,
+    totalICU: 0,
     bloodBank: {
-      "A+": 12,
-      "A-": 5,
-      "B+": 8,
-      "B-": 3,
-      "O+": 15,
-      "O-": 7,
-      "AB+": 4,
-      "AB-": 2,
+      "A+": 0,
+      "A-": 0,
+      "B+": 0,
+      "B-": 0,
+      "O+": 0,
+      "O-": 0,
+      "AB+": 0,
+      "AB-": 0,
     },
   });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchHospitalResources();
+  }, []);
+
+  const fetchHospitalResources = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('hospital_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching hospital resources:', error);
+      return;
+    }
+
+    if (data) {
+      // Initialize blood bank state from database
+      const bloodBankState = {
+        "A+": 0,
+        "A-": 0,
+        "B+": 0,
+        "B-": 0,
+        "O+": 0,
+        "O-": 0,
+        "AB+": 0,
+        "AB-": 0,
+      };
+
+      // Set available blood types to have units
+      if (data.blood_bank_types && Array.isArray(data.blood_bank_types)) {
+        data.blood_bank_types.forEach((type: string) => {
+          if (type in bloodBankState) {
+            (bloodBankState as any)[type] = 10; // Default to 10 units for available types
+          }
+        });
+      }
+
+      setResources({
+        oxygenCylinders: data.oxygen_cylinders_available || 0,
+        totalOxygen: data.oxygen_cylinders_total || 0,
+        icuBeds: data.icu_beds_available || 0,
+        totalICU: data.icu_beds_total || 0,
+        bloodBank: bloodBankState,
+      });
+    }
+  };
 
   const handleResourceChange = (field: string, value: number) => {
     setResources((prev) => ({
@@ -45,7 +98,47 @@ const ResourceControlCenter = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to update resources",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Get blood types that have units available
+    const availableBloodTypes = Object.entries(resources.bloodBank)
+      .filter(([_, units]) => units > 0)
+      .map(([type]) => type);
+
+    const { error } = await supabase
+      .from('hospital_profiles')
+      .update({
+        oxygen_cylinders_available: resources.oxygenCylinders,
+        oxygen_cylinders_total: resources.totalOxygen,
+        icu_beds_available: resources.icuBeds,
+        icu_beds_total: resources.totalICU,
+        blood_bank_types: availableBloodTypes,
+      })
+      .eq('user_id', user.id);
+
+    setLoading(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update resources. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Resources Updated",
       description: "Hospital resource availability has been updated successfully",
@@ -262,9 +355,9 @@ const ResourceControlCenter = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} size="lg" className="min-w-[200px]">
+        <Button onClick={handleSave} size="lg" className="min-w-[200px]" disabled={loading}>
           <Save className="w-4 h-4 mr-2" />
-          Save All Changes
+          {loading ? "Saving..." : "Save All Changes"}
         </Button>
       </div>
     </div>

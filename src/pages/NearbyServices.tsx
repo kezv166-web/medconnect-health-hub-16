@@ -43,6 +43,29 @@ const NearbyServices = () => {
 
   useEffect(() => {
     fetchRegisteredHospitals();
+
+    // Subscribe to realtime changes on hospital_profiles
+    const channel = supabase
+      .channel('hospital_profiles_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events: INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'hospital_profiles'
+        },
+        (payload) => {
+          console.log('Hospital update received:', payload);
+          // Refetch all hospitals when any change occurs
+          fetchRegisteredHospitals();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchRegisteredHospitals = async () => {
@@ -87,7 +110,23 @@ const NearbyServices = () => {
       // Merge registered hospitals with static facilities
       const combined = [...registeredFacilities, ...facilities];
       setAllFacilities(combined);
-      setFilteredFacilities(combined);
+      
+      // Re-apply search filter if there's an active search
+      if (searchQuery.trim()) {
+        const lowerQuery = searchQuery.toLowerCase();
+        const filtered = combined.filter((facility) => {
+          if (facility.name.toLowerCase().includes(lowerQuery)) return true;
+          if (facility.specialties.some(s => s.toLowerCase().includes(lowerQuery))) return true;
+          if (lowerQuery.includes("oxygen") && facility.resources.oxygenCylinders.available > 0) return true;
+          if (facility.resources.bloodBank.some(type => type.toLowerCase().includes(lowerQuery))) return true;
+          if (lowerQuery.includes("icu") && facility.resources.icuBeds.available > 0) return true;
+          if (lowerQuery.includes("pharmacy") && facility.resources.pharmacyOpen) return true;
+          return false;
+        });
+        setFilteredFacilities(filtered);
+      } else {
+        setFilteredFacilities(combined);
+      }
     }
   };
 
