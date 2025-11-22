@@ -278,14 +278,34 @@ export default function TodayScheduleView() {
           : occ
       ));
 
-      // Insert or update intake log
-      const { error } = await supabase.from("intake_logs").upsert({
-        schedule_id: occurrenceId,
-        status: "taken",
-        log_date: today,
-      }, {
-        onConflict: "schedule_id,log_date"
-      });
+      // Check if log already exists
+      const { data: existingLog } = await supabase
+        .from("intake_logs")
+        .select("id")
+        .eq("schedule_id", occurrenceId)
+        .eq("log_date", today)
+        .maybeSingle();
+
+      let error;
+      if (existingLog) {
+        // Update existing log
+        const { error: updateError } = await supabase
+          .from("intake_logs")
+          .update({ status: "taken", taken_at: takenAt })
+          .eq("id", existingLog.id);
+        error = updateError;
+      } else {
+        // Insert new log
+        const { error: insertError } = await supabase
+          .from("intake_logs")
+          .insert({
+            schedule_id: occurrenceId,
+            status: "taken",
+            log_date: today,
+            taken_at: takenAt
+          });
+        error = insertError;
+      }
 
       if (error) throw error;
 
