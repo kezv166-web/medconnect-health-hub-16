@@ -18,6 +18,42 @@ const HospitalDashboard = () => {
 
   useEffect(() => {
     fetchHospitalName();
+
+    // Subscribe to realtime changes for hospital name
+    const setupRealtimeSubscription = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const channel = supabase
+        .channel('hospital_name_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'hospital_profiles',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            if (payload.new && typeof payload.new === 'object' && 'name' in payload.new) {
+              setHospitalName(payload.new.name as string);
+            }
+          }
+        )
+        .subscribe();
+
+      return channel;
+    };
+
+    const channelPromise = setupRealtimeSubscription();
+
+    return () => {
+      channelPromise.then(channel => {
+        if (channel) {
+          supabase.removeChannel(channel);
+        }
+      });
+    };
   }, []);
 
   const fetchHospitalName = async () => {
