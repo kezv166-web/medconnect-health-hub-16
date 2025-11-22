@@ -18,6 +18,7 @@ type SidebarItem = "home" | "profile" | "nearby" | "form";
 const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState<SidebarItem>("home");
   const [patientName, setPatientName] = useState("Patient");
+  const [fullName, setFullName] = useState("Patient");
 
   useEffect(() => {
     const fetchPatientProfile = async () => {
@@ -30,6 +31,7 @@ const PatientDashboard = () => {
           .maybeSingle();
         
         if (data) {
+          setFullName(data.full_name);
           setPatientName(data.full_name.split(' ')[0]);
         }
       }
@@ -39,7 +41,7 @@ const PatientDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <PatientSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <PatientSidebar activeTab={activeTab} onTabChange={setActiveTab} userName={fullName} />
       
       {/* Floating AI Chat Button */}
       <FloatingChatButton />

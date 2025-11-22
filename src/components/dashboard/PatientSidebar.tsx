@@ -9,6 +9,7 @@ type SidebarItem = "home" | "profile" | "nearby" | "form";
 interface PatientSidebarProps {
   activeTab: SidebarItem;
   onTabChange: (tab: SidebarItem) => void;
+  userName?: string;
 }
 
 const navItems = [
@@ -18,7 +19,7 @@ const navItems = [
   { id: "form" as const, icon: FileText, label: "Update Form" },
 ];
 
-const PatientSidebar = ({ activeTab, onTabChange }: PatientSidebarProps) => {
+const PatientSidebar = ({ activeTab, onTabChange, userName = "Patient" }: PatientSidebarProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -91,7 +92,7 @@ const PatientSidebar = ({ activeTab, onTabChange }: PatientSidebarProps) => {
         <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
           <div className="px-4 py-3 bg-primary/10 rounded-lg border border-primary/20">
             <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
-            <p className="font-semibold text-foreground">John Doe</p>
+            <p className="font-semibold text-foreground">{userName}</p>
             <p className="text-xs text-muted-foreground">Patient</p>
           </div>
           <Button
