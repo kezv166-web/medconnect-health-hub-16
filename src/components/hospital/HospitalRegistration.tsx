@@ -33,8 +33,25 @@ const HospitalRegistration = () => {
 
   const fetchHospitalProfile = async () => {
     setInitialLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    
+    // Check for mock hospital auth
+    const mockRole = localStorage.getItem("mockRole");
+    let userId: string | null = null;
+    
+    if (mockRole === "hospital") {
+      // For mock hospital auth, use or create a persistent hospital user ID
+      userId = localStorage.getItem("mockHospitalUserId");
+      if (!userId) {
+        userId = `hospital_${crypto.randomUUID()}`;
+        localStorage.setItem("mockHospitalUserId", userId);
+      }
+    } else {
+      // For real auth (patients), use Supabase user
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id || null;
+    }
+    
+    if (!userId) {
       setInitialLoading(false);
       return;
     }
@@ -42,7 +59,7 @@ const HospitalRegistration = () => {
     const { data, error } = await supabase
       .from('hospital_profiles')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .maybeSingle();
 
     if (error) {
@@ -82,8 +99,23 @@ const HospitalRegistration = () => {
     }
 
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    
+    // Get user ID (mock or real)
+    const mockRole = localStorage.getItem("mockRole");
+    let userId: string | null = null;
+    
+    if (mockRole === "hospital") {
+      userId = localStorage.getItem("mockHospitalUserId");
+      if (!userId) {
+        userId = `hospital_${crypto.randomUUID()}`;
+        localStorage.setItem("mockHospitalUserId", userId);
+      }
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id || null;
+    }
+    
+    if (!userId) {
       toast({
         title: "Error",
         description: "You must be logged in",
@@ -101,7 +133,7 @@ const HospitalRegistration = () => {
     const { error } = await supabase
       .from('hospital_profiles')
       .upsert({
-        user_id: user.id,
+        user_id: userId,
         name: hospitalData.name,
         address: hospitalData.address,
         phone: hospitalData.phone,

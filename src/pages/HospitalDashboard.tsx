@@ -21,8 +21,18 @@ const HospitalDashboard = () => {
 
     // Subscribe to realtime changes for hospital name
     const setupRealtimeSubscription = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      // Get user ID (mock or real)
+      const mockRole = localStorage.getItem("mockRole");
+      let userId: string | null = null;
+      
+      if (mockRole === "hospital") {
+        userId = localStorage.getItem("mockHospitalUserId");
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id || null;
+      }
+      
+      if (!userId) return;
 
       const channel = supabase
         .channel('hospital_name_changes')
@@ -32,7 +42,7 @@ const HospitalDashboard = () => {
             event: 'UPDATE',
             schema: 'public',
             table: 'hospital_profiles',
-            filter: `user_id=eq.${user.id}`
+            filter: `user_id=eq.${userId}`
           },
           (payload) => {
             if (payload.new && typeof payload.new === 'object' && 'name' in payload.new) {
@@ -57,13 +67,27 @@ const HospitalDashboard = () => {
   }, []);
 
   const fetchHospitalName = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    // Get user ID (mock or real)
+    const mockRole = localStorage.getItem("mockRole");
+    let userId: string | null = null;
+    
+    if (mockRole === "hospital") {
+      userId = localStorage.getItem("mockHospitalUserId");
+      if (!userId) {
+        userId = `hospital_${crypto.randomUUID()}`;
+        localStorage.setItem("mockHospitalUserId", userId);
+      }
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id || null;
+    }
+    
+    if (!userId) return;
 
     const { data } = await supabase
       .from('hospital_profiles')
       .select('name')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .maybeSingle();
 
     if (data) {
@@ -149,10 +173,11 @@ const HospitalDashboard = () => {
           <Button
             variant="ghost"
             className="w-full justify-start text-muted-foreground hover:text-foreground"
-            onClick={() => {
-              sessionStorage.removeItem("mockRole");
-              navigate("/");
-            }}
+          onClick={() => {
+            localStorage.removeItem("mockRole");
+            localStorage.removeItem("mockHospitalUserId");
+            navigate("/");
+          }}
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout
