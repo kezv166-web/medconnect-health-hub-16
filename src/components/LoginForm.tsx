@@ -20,6 +20,11 @@ interface LoginFormProps {
   onClose: () => void;
 }
 
+const RESERVED_EMAILS = [
+  'hospitals@gmail.com',
+  'doctor12@gmail.com'
+];
+
 const authSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -62,6 +67,16 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
 
     try {
       if (role === "patient") {
+        // Check for reserved emails
+        if (RESERVED_EMAILS.includes(data.email.toLowerCase())) {
+          if (mode === "login") {
+            setAuthError("This email is reserved for staff portals. Please use the correct portal (Doctor or Hospital).");
+          } else {
+            setAuthError("This email is reserved for staff portals. Please use a different email address.");
+          }
+          return;
+        }
+
         // Real authentication for patient role
         if (mode === "login") {
           const { data: authData, error } = await supabase.auth.signInWithPassword({
