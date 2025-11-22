@@ -116,6 +116,7 @@ const HospitalDashboard = () => {
           variant="ghost"
           size="icon"
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="hover:bg-destructive/10 hover:text-destructive"
         >
           {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
