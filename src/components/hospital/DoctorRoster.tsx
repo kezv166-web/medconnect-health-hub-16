@@ -147,7 +147,7 @@ const DoctorRoster = () => {
       {/* Add Doctor Button */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button onClick={() => setEditingDoctor(null)}>
+          <Button onClick={() => setEditingDoctor(null)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
             <Plus className="w-4 h-4 mr-2" />
             Add Doctor
           </Button>
@@ -230,7 +230,7 @@ const DoctorRoster = () => {
           </div>
 
           <div className="flex gap-3">
-            <Button onClick={handleSubmit} className="flex-1">
+            <Button onClick={handleSubmit} className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground">
               {editingDoctor ? "Update Doctor" : "Add Doctor"}
             </Button>
             <Button variant="outline" onClick={resetForm} className="flex-1">
