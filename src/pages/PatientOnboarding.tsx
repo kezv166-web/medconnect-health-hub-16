@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Plus, Trash2, ArrowRight, ArrowLeft, Clock } from "lucide-react";
+import { CalendarIcon, Plus, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ClockPicker } from "@/components/ui/clock-picker";
 
 // Zod validation schemas
 const step1Schema = z.object({
@@ -473,46 +474,19 @@ const PatientOnboarding = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor={`medicines.${index}.time`} className="flex items-center gap-2 text-sm font-medium">
-                          <Clock className="h-4 w-4 text-primary" />
+                        <Label className="text-sm font-medium">
                           Time of Day *
                         </Label>
-                        <div className="flex gap-3">
-                          <Select 
-                            value={form.watch(`medicines.${index}.time`)} 
-                            onValueChange={value => form.setValue(`medicines.${index}.time`, value)}
-                          >
-                            <SelectTrigger className="flex-1 h-11">
-                              <SelectValue placeholder="Select time" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-background z-50">
-                              <SelectItem value="6:00">6:00</SelectItem>
-                              <SelectItem value="7:00">7:00</SelectItem>
-                              <SelectItem value="8:00">8:00</SelectItem>
-                              <SelectItem value="9:00">9:00</SelectItem>
-                              <SelectItem value="10:00">10:00</SelectItem>
-                              <SelectItem value="11:00">11:00</SelectItem>
-                              <SelectItem value="12:00">12:00</SelectItem>
-                              <SelectItem value="1:00">1:00</SelectItem>
-                              <SelectItem value="2:00">2:00</SelectItem>
-                              <SelectItem value="3:00">3:00</SelectItem>
-                              <SelectItem value="4:00">4:00</SelectItem>
-                              <SelectItem value="5:00">5:00</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Select 
-                            value={form.watch(`medicines.${index}.period`)} 
-                            onValueChange={value => form.setValue(`medicines.${index}.period`, value as "AM" | "PM")}
-                          >
-                            <SelectTrigger className="w-24 h-11 font-medium">
-                              <SelectValue placeholder="AM/PM" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-background z-50">
-                              <SelectItem value="AM">AM</SelectItem>
-                              <SelectItem value="PM">PM</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <ClockPicker
+                          value={form.watch(`medicines.${index}.time`)}
+                          onChange={(time) => {
+                            const [timeOnly, period] = time.split(" ");
+                            const [hours] = timeOnly.split(":");
+                            form.setValue(`medicines.${index}.time`, timeOnly);
+                            form.setValue(`medicines.${index}.period`, period as "AM" | "PM");
+                          }}
+                          className="w-full"
+                        />
                         {form.formState.errors.medicines?.[index]?.time && <p className="text-sm text-destructive mt-1">
                             {form.formState.errors.medicines[index]?.time?.message}
                           </p>}
