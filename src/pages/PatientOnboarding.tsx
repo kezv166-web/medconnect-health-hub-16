@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Plus, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
+import { CalendarIcon, Plus, Trash2, ArrowRight, ArrowLeft, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -639,34 +639,41 @@ const PatientOnboarding = () => {
                         </Select>
                       </div>
 
-                      <div className="grid grid-cols-[1fr_auto] gap-3">
-                        <div>
-                          <Label htmlFor={`medicines.${index}.time`}>Time *</Label>
-                          <Input
-                            id={`medicines.${index}.time`}
-                            {...form.register(`medicines.${index}.time`)}
-                            placeholder="09:00"
-                            type="time"
-                            className="transition-all duration-200 hover:border-primary/50 focus:border-primary"
-                          />
-                        </div>
-                        <div className="w-24">
-                          <Label>Period *</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor={`medicines.${index}.time`} className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          Time of Day *
+                        </Label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Input
+                              id={`medicines.${index}.time`}
+                              {...form.register(`medicines.${index}.time`)}
+                              placeholder="09:00"
+                              type="time"
+                              className="transition-all duration-200 hover:border-primary/50 focus:border-primary pr-2"
+                            />
+                          </div>
                           <Select
                             value={form.watch(`medicines.${index}.period`)}
                             onValueChange={(value) =>
                               form.setValue(`medicines.${index}.period`, value as "AM" | "PM")
                             }
                           >
-                            <SelectTrigger className="transition-all duration-200 hover:border-primary/50">
+                            <SelectTrigger className="w-24 transition-all duration-200 hover:border-primary/50 font-medium">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-background z-50">
-                              <SelectItem value="AM">AM</SelectItem>
-                              <SelectItem value="PM">PM</SelectItem>
+                              <SelectItem value="AM" className="font-medium">AM</SelectItem>
+                              <SelectItem value="PM" className="font-medium">PM</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
+                        {form.formState.errors.medicines?.[index]?.time && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.medicines[index]?.time?.message}
+                          </p>
+                        )}
                       </div>
 
                       <div>
