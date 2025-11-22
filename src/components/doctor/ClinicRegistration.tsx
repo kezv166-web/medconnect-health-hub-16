@@ -20,12 +20,6 @@ const ClinicRegistration = () => {
     specialties: "",
     hours: "",
     description: "",
-    oxygenAvailable: 0,
-    oxygenTotal: 0,
-    icuAvailable: 0,
-    icuTotal: 0,
-    bloodBank: "",
-    pharmacyOpen: false,
   });
 
   useEffect(() => {
@@ -56,12 +50,6 @@ const ClinicRegistration = () => {
         specialties: data.specialties?.join(', ') || '',
         hours: data.operating_hours,
         description: data.description || '',
-        oxygenAvailable: data.oxygen_cylinders_available || 0,
-        oxygenTotal: data.oxygen_cylinders_total || 0,
-        icuAvailable: data.icu_beds_available || 0,
-        icuTotal: data.icu_beds_total || 0,
-        bloodBank: data.blood_bank_types?.join(', ') || '',
-        pharmacyOpen: data.pharmacy_open || false,
       });
     }
   };
@@ -92,11 +80,6 @@ const ClinicRegistration = () => {
       .split(',')
       .map(s => s.trim())
       .filter(s => s);
-    
-    const bloodBankArray = clinicData.bloodBank
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s);
 
     const { error } = await supabase
       .from('hospital_profiles')
@@ -108,12 +91,6 @@ const ClinicRegistration = () => {
         operating_hours: clinicData.hours,
         specialties: specialtiesArray,
         description: clinicData.description,
-        oxygen_cylinders_available: clinicData.oxygenAvailable,
-        oxygen_cylinders_total: clinicData.oxygenTotal,
-        icu_beds_available: clinicData.icuAvailable,
-        icu_beds_total: clinicData.icuTotal,
-        blood_bank_types: bloodBankArray,
-        pharmacy_open: clinicData.pharmacyOpen,
       });
 
     setLoading(false);
@@ -254,82 +231,6 @@ const ClinicRegistration = () => {
                 placeholder="Describe your clinic, services, and facilities..."
                 rows={4}
               />
-            </div>
-          </div>
-
-          {/* Resources Section */}
-          <div className="border-t border-border pt-6">
-            <h3 className="text-lg font-semibold mb-4">Resources & Availability</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="oxygen-available">Oxygen Cylinders Available</Label>
-                <Input
-                  id="oxygen-available"
-                  type="number"
-                  min="0"
-                  value={clinicData.oxygenAvailable}
-                  onChange={(e) => setClinicData({ ...clinicData, oxygenAvailable: parseInt(e.target.value) || 0 })}
-                  placeholder="0"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="oxygen-total">Total Oxygen Cylinders</Label>
-                <Input
-                  id="oxygen-total"
-                  type="number"
-                  min="0"
-                  value={clinicData.oxygenTotal}
-                  onChange={(e) => setClinicData({ ...clinicData, oxygenTotal: parseInt(e.target.value) || 0 })}
-                  placeholder="0"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="icu-available">ICU Beds Available</Label>
-                <Input
-                  id="icu-available"
-                  type="number"
-                  min="0"
-                  value={clinicData.icuAvailable}
-                  onChange={(e) => setClinicData({ ...clinicData, icuAvailable: parseInt(e.target.value) || 0 })}
-                  placeholder="0"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="icu-total">Total ICU Beds</Label>
-                <Input
-                  id="icu-total"
-                  type="number"
-                  min="0"
-                  value={clinicData.icuTotal}
-                  onChange={(e) => setClinicData({ ...clinicData, icuTotal: parseInt(e.target.value) || 0 })}
-                  placeholder="0"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="blood-bank">Blood Bank Types Available</Label>
-                <Input
-                  id="blood-bank"
-                  value={clinicData.bloodBank}
-                  onChange={(e) => setClinicData({ ...clinicData, bloodBank: e.target.value })}
-                  placeholder="A+, B+, O-, AB+ (comma separated)"
-                />
-              </div>
-
-              <div className="space-y-2 flex items-end">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={clinicData.pharmacyOpen}
-                    onChange={(e) => setClinicData({ ...clinicData, pharmacyOpen: e.target.checked })}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm font-medium">Pharmacy Currently Open</span>
-                </label>
-              </div>
             </div>
           </div>
 
