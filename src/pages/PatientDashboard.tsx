@@ -21,6 +21,9 @@ const PatientDashboard = () => {
   const [fullName, setFullName] = useState("Patient");
 
   useEffect(() => {
+    // Always ensure we start on home tab
+    setActiveTab("home");
+    
     const fetchPatientProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
