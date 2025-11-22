@@ -188,10 +188,20 @@ const ResourceControlCenter = () => {
                 </p>
               </div>
               <Badge
-                variant={resources.oxygenCylinders > 10 ? "default" : "destructive"}
-                className="text-sm"
+                variant={
+                  resources.totalOxygen === 0 || (resources.oxygenCylinders / resources.totalOxygen) * 100 < 30
+                    ? "destructive"
+                    : (resources.oxygenCylinders / resources.totalOxygen) * 100 < 60
+                    ? "secondary"
+                    : "default"
+                }
+                className={`text-sm ${
+                  resources.totalOxygen === 0 || (resources.oxygenCylinders / resources.totalOxygen) * 100 < 60
+                    ? ""
+                    : "bg-success hover:bg-success/90"
+                }`}
               >
-                {Math.round((resources.oxygenCylinders / resources.totalOxygen) * 100)}% Available
+                {resources.totalOxygen > 0 ? Math.round((resources.oxygenCylinders / resources.totalOxygen) * 100) : 0}% Available
               </Badge>
             </div>
 
@@ -265,10 +275,20 @@ const ResourceControlCenter = () => {
                 </p>
               </div>
               <Badge
-                variant={resources.icuBeds > 2 ? "default" : "destructive"}
-                className="text-sm"
+                variant={
+                  resources.totalICU === 0 || (resources.icuBeds / resources.totalICU) * 100 < 30
+                    ? "destructive"
+                    : (resources.icuBeds / resources.totalICU) * 100 < 60
+                    ? "secondary"
+                    : "default"
+                }
+                className={`text-sm ${
+                  resources.totalICU === 0 || (resources.icuBeds / resources.totalICU) * 100 < 60
+                    ? ""
+                    : "bg-success hover:bg-success/90"
+                }`}
               >
-                {Math.round((resources.icuBeds / resources.totalICU) * 100)}% Available
+                {resources.totalICU > 0 ? Math.round((resources.icuBeds / resources.totalICU) * 100) : 0}% Available
               </Badge>
             </div>
 
