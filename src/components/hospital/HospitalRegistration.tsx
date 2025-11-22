@@ -15,6 +15,7 @@ const HospitalRegistration = () => {
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [hospitalData, setHospitalData] = useState({
     name: "",
     address: "",
@@ -31,8 +32,12 @@ const HospitalRegistration = () => {
   }, []);
 
   const fetchHospitalProfile = async () => {
+    setInitialLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      setInitialLoading(false);
+      return;
+    }
 
     const { data, error } = await supabase
       .from('hospital_profiles')
@@ -42,11 +47,13 @@ const HospitalRegistration = () => {
 
     if (error) {
       console.error('Error fetching hospital profile:', error);
+      setInitialLoading(false);
       return;
     }
 
     if (data) {
       setHasProfile(true);
+      setIsEditing(false);
       setHospitalData({
         name: data.name,
         address: data.address,
@@ -59,7 +66,9 @@ const HospitalRegistration = () => {
       });
     } else {
       setIsEditing(true);
+      setHasProfile(false);
     }
+    setInitialLoading(false);
   };
 
   const handleSave = async () => {
@@ -123,6 +132,18 @@ const HospitalRegistration = () => {
         : "Your hospital has been registered successfully and is now visible in nearby services",
     });
   };
+
+  // Show loading state during initial fetch
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-destructive border-r-transparent"></div>
+          <p className="text-muted-foreground mt-4">Loading hospital profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show profile view if profile exists and not editing
   if (hasProfile && !isEditing) {
