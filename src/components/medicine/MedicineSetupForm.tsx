@@ -131,12 +131,11 @@ export default function MedicineSetupForm({ onSuccess, onCancel }: MedicineSetup
           {timeSlotLabels.map(({ value, label }) => (
             <div
               key={value}
-              className={`flex items-center space-x-3 rounded-lg border-2 p-4 cursor-pointer transition-all ${
+              className={`flex items-center space-x-3 rounded-lg border-2 p-4 transition-all ${
                 selectedTimeSlots.includes(value)
                   ? "border-primary bg-primary/5"
                   : "border-border hover:border-primary/50"
               }`}
-              onClick={() => handleTimeSlotToggle(value)}
             >
               <Checkbox
                 id={value}
