@@ -67,6 +67,7 @@ const PatientConnect = () => {
     phone: "",
     lastVisit: new Date(),
   });
+  const [editPrescriptionFile, setEditPrescriptionFile] = useState<File | null>(null);
 
   const handleSendInvite = () => {
     if (!referralData.email && !referralData.phone) {
@@ -272,12 +273,16 @@ const PatientConnect = () => {
       </div>
 
       {/* Patient Record View Dialog */}
-      <Dialog open={!!viewingPatient} onOpenChange={() => setViewingPatient(null)}>
+      <Dialog open={!!viewingPatient} onOpenChange={() => {
+        setViewingPatient(null);
+        setIsEditMode(false);
+        setEditPrescriptionFile(null);
+      }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Patient Record</DialogTitle>
+            <DialogTitle>{isEditMode ? "Edit Patient Record" : "Patient Record"}</DialogTitle>
             <DialogDescription>
-              View patient details and prescription information
+              {isEditMode ? "Update patient details" : "View patient details and prescription information"}
             </DialogDescription>
           </DialogHeader>
           
@@ -287,24 +292,50 @@ const PatientConnect = () => {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Patient Name</Label>
-                  <p className="text-lg font-semibold">{viewingPatient.name}</p>
+                  {isEditMode ? (
+                    <Input
+                      value={editData.name}
+                      onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      placeholder="Patient Name"
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold">{viewingPatient.name}</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-sm text-muted-foreground">Email</Label>
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-sm">{viewingPatient.email}</p>
-                    </div>
+                    {isEditMode ? (
+                      <Input
+                        type="email"
+                        value={editData.email}
+                        onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                        placeholder="Email"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-muted-foreground" />
+                        <p className="text-sm">{viewingPatient.email}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-sm text-muted-foreground">Phone Number</Label>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-sm">{viewingPatient.phone}</p>
-                    </div>
+                    {isEditMode ? (
+                      <Input
+                        type="tel"
+                        value={editData.phone}
+                        onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                        placeholder="Phone"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-muted-foreground" />
+                        <p className="text-sm">{viewingPatient.phone}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -352,12 +383,30 @@ const PatientConnect = () => {
                 {/* Prescription Image */}
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Prescription</Label>
-                  <div className="border rounded-lg p-4 bg-muted/30">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Upload className="w-4 h-4" />
-                      <span>Prescription image will be displayed here</span>
+                  {isEditMode ? (
+                    <div className="border-2 border-dashed border-input rounded-md p-6 text-center hover:border-primary/50 transition-colors">
+                      <input
+                        id="edit-prescription"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setEditPrescriptionFile(e.target.files?.[0] || null)}
+                        className="hidden"
+                      />
+                      <label htmlFor="edit-prescription" className="cursor-pointer">
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                          {editPrescriptionFile ? editPrescriptionFile.name : "Click to upload new prescription image"}
+                        </p>
+                      </label>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="border rounded-lg p-4 bg-muted/30">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Upload className="w-4 h-4" />
+                        <span>Prescription image will be displayed here</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -409,6 +458,7 @@ const PatientConnect = () => {
                       className="flex-1"
                       onClick={() => {
                         setIsEditMode(true);
+                        setEditPrescriptionFile(null);
                         setEditData({
                           name: viewingPatient.name,
                           email: viewingPatient.email,
@@ -421,7 +471,10 @@ const PatientConnect = () => {
                     </Button>
                     <Button 
                       variant="outline" 
-                      onClick={() => setViewingPatient(null)}
+                      onClick={() => {
+                        setViewingPatient(null);
+                        setIsEditMode(false);
+                      }}
                       className="flex-1"
                     >
                       Close
