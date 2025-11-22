@@ -13,6 +13,7 @@ import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { UserRole } from "./RoleSelector";
+import SecondaryAuthDialog from "./SecondaryAuthDialog";
 
 interface LoginFormProps {
   role: UserRole;
@@ -37,6 +38,8 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [showSecondaryAuth, setShowSecondaryAuth] = useState(false);
+  const [verifiedRole, setVerifiedRole] = useState<'doctor' | 'hospital' | null>(null);
 
   const loginForm = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
@@ -148,22 +151,15 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
           return;
         }
 
-        // Mock successful login for allowed credentials
-        // Store mock role in sessionStorage for RoleProtectedRoute
-        sessionStorage.setItem("mockRole", role);
+        // Credentials verified - show secondary auth dialog
+        toast({
+          title: "Credentials Verified",
+          description: "Please complete authentication with your account.",
+        });
         
-        setTimeout(() => {
-          toast({
-            title: mode === "login" ? "Login Successful" : "Access Granted",
-            description: `Welcome to ${getRoleTitle()} Portal!`,
-          });
-
-          if (role === "doctor") {
-            navigate("/doctor-dashboard");
-          } else if (role === "hospital") {
-            navigate("/hospital-dashboard");
-          }
-        }, 600);
+        setVerifiedRole(role);
+        setShowSecondaryAuth(true);
+        onClose(); // Close the first dialog
       }
     } catch (error: any) {
       console.error("Auth error:", error);
@@ -174,12 +170,13 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{getRoleTitle()} Portal</DialogTitle>
-          <DialogDescription>Enter your credentials to continue</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">{getRoleTitle()} Portal</DialogTitle>
+            <DialogDescription>Enter your credentials to continue</DialogDescription>
+          </DialogHeader>
 
         {authError && (
           <Alert variant="destructive" className="mb-4">
@@ -314,6 +311,21 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
         )}
       </DialogContent>
     </Dialog>
+
+    <SecondaryAuthDialog
+      open={showSecondaryAuth}
+      onOpenChange={setShowSecondaryAuth}
+      role={verifiedRole!}
+      onSuccess={() => {
+        setShowSecondaryAuth(false);
+        toast({
+          title: "Authentication Successful",
+          description: `Welcome to ${verifiedRole === 'doctor' ? 'Doctor' : 'Hospital Authority'} Portal!`,
+        });
+        navigate(`/${verifiedRole}-dashboard`);
+      }}
+    />
+    </>
   );
 };
 
