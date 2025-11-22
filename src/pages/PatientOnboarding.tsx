@@ -479,7 +479,7 @@ const PatientOnboarding = () => {
                         </Label>
                         <div className="flex gap-3">
                           <div className="relative flex-1">
-                            <Input id={`medicines.${index}.time`} {...form.register(`medicines.${index}.time`)} placeholder="09:00" type="time" className="h-11 text-base font-medium transition-all duration-200 hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                            
                           </div>
                           
                         </div>
