@@ -317,7 +317,7 @@ const ClinicRegistration = () => {
                 Cancel
               </Button>
             )}
-            <Button onClick={handleSave} size="lg" className="min-w-[200px]" disabled={loading}>
+            <Button onClick={handleSave} size="lg" className="min-w-[200px] bg-success hover:bg-success/90" disabled={loading}>
               <Save className="w-4 h-4 mr-2" />
               {loading ? "Saving..." : hasProfile ? "Save Changes" : "Register Clinic"}
             </Button>
