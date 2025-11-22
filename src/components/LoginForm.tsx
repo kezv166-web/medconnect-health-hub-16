@@ -120,6 +120,9 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
         }
 
         // Mock successful login for allowed credentials
+        // Store mock role in sessionStorage for RoleProtectedRoute
+        sessionStorage.setItem("mockRole", role);
+        
         setTimeout(() => {
           toast({
             title: mode === "login" ? "Login Successful" : "Access Granted",
