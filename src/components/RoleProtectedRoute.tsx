@@ -15,47 +15,41 @@ const RoleProtectedRoute = ({ children, allowedRole }: RoleProtectedRouteProps) 
   useEffect(() => {
     const checkRoleAndAuth = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        // Check for mock auth sessions (doctor/hospital)
+        const mockRole = sessionStorage.getItem("mockRole");
         
-        if (!user) {
-          // User not authenticated, redirect to auth page
-          navigate("/auth");
-          return;
-        }
-
-        // Check user role
-        const { data: roleData, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .single();
-
-        if (error || !roleData) {
-          // No role assigned, redirect to auth
-          navigate("/auth");
-          return;
-        }
-
-        if (roleData.role !== allowedRole) {
-          // Wrong role, redirect to appropriate dashboard
-          if (roleData.role === "patient") {
-            navigate("/patient-dashboard");
-          } else if (roleData.role === "doctor") {
-            navigate("/doctor-dashboard");
-          } else if (roleData.role === "hospital") {
-            navigate("/hospital-dashboard");
+        if (mockRole === "doctor" || mockRole === "hospital") {
+          // Mock authentication for doctor/hospital
+          if (mockRole === allowedRole) {
+            setIsAuthorized(true);
+            setIsChecking(false);
           } else {
-            navigate("/");
+            // Wrong mock role, redirect
+            navigate(`/${mockRole}-dashboard`);
           }
           return;
         }
 
-        // Correct role, allow access
-        setIsAuthorized(true);
-        setIsChecking(false);
+        // Real Supabase authentication for patients
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          // User not authenticated, redirect to home
+          navigate("/");
+          return;
+        }
+
+        // Only patients use Supabase auth with roles
+        if (allowedRole === "patient") {
+          setIsAuthorized(true);
+          setIsChecking(false);
+        } else {
+          // Trying to access doctor/hospital dashboard with patient auth
+          navigate("/patient-dashboard");
+        }
       } catch (error) {
         console.error("Error in role check:", error);
-        navigate("/auth");
+        navigate("/");
       }
     };
 

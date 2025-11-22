@@ -21,7 +21,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           return;
         }
 
-        // Check if profile exists
+        // Only check for patient profiles for authenticated users (patients only)
+        // Doctors and hospitals use mock auth and don't have profiles in the database
         const { data: profile, error } = await supabase
           .from("patient_profiles")
           .select("id")
