@@ -46,6 +46,8 @@ const HospitalRegistration = () => {
       .from('hospital_profiles')
       .select('*')
       .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (error) {
@@ -104,19 +106,48 @@ const HospitalRegistration = () => {
       .map(s => s.trim())
       .filter(s => s);
 
-    const { error } = await supabase
+    // Check if a profile already exists for this user
+    const { data: existingProfile } = await supabase
       .from('hospital_profiles')
-      .upsert({
-        user_id: user.id,
-        name: hospitalData.name,
-        address: hospitalData.address,
-        phone: hospitalData.phone,
-        operating_hours: hospitalData.operating_hours,
-        specialties: specialtiesArray,
-        latitude: hospitalData.latitude,
-        longitude: hospitalData.longitude,
-        pharmacy_open: hospitalData.pharmacy_open,
-      });
+      .select('id')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let error;
+
+    if (existingProfile) {
+      // Update the latest existing profile
+      ({ error } = await supabase
+        .from('hospital_profiles')
+        .update({
+          name: hospitalData.name,
+          address: hospitalData.address,
+          phone: hospitalData.phone,
+          operating_hours: hospitalData.operating_hours,
+          specialties: specialtiesArray,
+          latitude: hospitalData.latitude,
+          longitude: hospitalData.longitude,
+          pharmacy_open: hospitalData.pharmacy_open,
+        })
+        .eq('id', existingProfile.id));
+    } else {
+      // Create a new profile for this user
+      ({ error } = await supabase
+        .from('hospital_profiles')
+        .insert({
+          user_id: user.id,
+          name: hospitalData.name,
+          address: hospitalData.address,
+          phone: hospitalData.phone,
+          operating_hours: hospitalData.operating_hours,
+          specialties: specialtiesArray,
+          latitude: hospitalData.latitude,
+          longitude: hospitalData.longitude,
+          pharmacy_open: hospitalData.pharmacy_open,
+        }));
+    }
 
     setLoading(false);
 
