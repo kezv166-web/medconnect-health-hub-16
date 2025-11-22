@@ -173,11 +173,10 @@ const HospitalDashboard = () => {
           <Button
             variant="ghost"
             className="w-full justify-start text-muted-foreground hover:text-foreground"
-          onClick={() => {
-            localStorage.removeItem("mockRole");
-            localStorage.removeItem("mockHospitalUserId");
-            navigate("/");
-          }}
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate("/");
+            }}
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout

@@ -15,27 +15,7 @@ const RoleProtectedRoute = ({ children, allowedRole }: RoleProtectedRouteProps) 
   useEffect(() => {
     const checkRoleAndAuth = async () => {
       try {
-        // Check for mock auth sessions (doctor/hospital) - check both storage locations
-        let mockRole = localStorage.getItem("mockRole") ?? sessionStorage.getItem("mockRole");
-        
-        // Sync to localStorage if found only in sessionStorage
-        if (mockRole && !localStorage.getItem("mockRole")) {
-          localStorage.setItem("mockRole", mockRole);
-        }
-        
-        if (mockRole === "doctor" || mockRole === "hospital") {
-          // Mock authentication for doctor/hospital
-          if (mockRole === allowedRole) {
-            setIsAuthorized(true);
-            setIsChecking(false);
-          } else {
-            // Wrong mock role, redirect
-            navigate(`/${mockRole}-dashboard`);
-          }
-          return;
-        }
-
-        // Real Supabase authentication for patients
+        // Get current authenticated user
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
@@ -44,13 +24,22 @@ const RoleProtectedRoute = ({ children, allowedRole }: RoleProtectedRouteProps) 
           return;
         }
 
-        // Only patients use Supabase auth with roles
-        if (allowedRole === "patient") {
+        // Fetch user's role from the backend
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        
+        const userRole = roleData?.role || 'patient'; // Default to patient if no role found
+        
+        // Check if user has the required role for this route
+        if (userRole === allowedRole) {
           setIsAuthorized(true);
           setIsChecking(false);
         } else {
-          // Trying to access doctor/hospital dashboard with patient auth
-          navigate("/patient-dashboard");
+          // Redirect to their correct dashboard based on their actual role
+          navigate(`/${userRole}-dashboard`);
         }
       } catch (error) {
         console.error("Error in role check:", error);

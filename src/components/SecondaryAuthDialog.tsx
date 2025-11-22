@@ -70,8 +70,21 @@ const SecondaryAuthDialog = ({ open, onOpenChange, role, onSuccess }: SecondaryA
         }
 
         if (authData.user) {
-          // Set sessionStorage for role (to work with existing RoleProtectedRoute)
-          sessionStorage.setItem("mockRole", role);
+          // Check if user already has a role in the database
+          const { data: existingRole } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', authData.user.id)
+            .single();
+          
+          // If no role exists, insert the appropriate role
+          if (!existingRole) {
+            await supabase.from('user_roles').insert({
+              user_id: authData.user.id,
+              role: role // 'hospital' or 'doctor'
+            });
+          }
+          
           onSuccess();
         }
       } else {
@@ -91,8 +104,21 @@ const SecondaryAuthDialog = ({ open, onOpenChange, role, onSuccess }: SecondaryA
         }
 
         if (authData.user) {
-          // Set sessionStorage for role (to work with existing RoleProtectedRoute)
-          sessionStorage.setItem("mockRole", role);
+          // Check if user already has a role in the database
+          const { data: existingRole } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', authData.user.id)
+            .single();
+          
+          // If no role exists, insert the appropriate role
+          if (!existingRole) {
+            await supabase.from('user_roles').insert({
+              user_id: authData.user.id,
+              role: role // 'hospital' or 'doctor'
+            });
+          }
+          
           onSuccess();
         }
       }
