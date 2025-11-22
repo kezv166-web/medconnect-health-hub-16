@@ -23,6 +23,7 @@ const step1Schema = z.object({
   phone_number: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format"),
   email: z.string().email("Invalid email address"),
   age: z.number().min(1, "Age must be at least 1").max(120, "Age must be less than 120"),
+  blood_group: z.string().optional(),
   primary_health_condition: z.string().min(2, "Please specify your primary health condition"),
 });
 
@@ -66,6 +67,7 @@ const PatientOnboarding = () => {
       phone_number: "",
       email: "",
       age: 0,
+      blood_group: "",
       primary_health_condition: "",
       doctor_name: "",
       specialty: "",
@@ -111,6 +113,7 @@ const PatientOnboarding = () => {
         "phone_number",
         "email",
         "age",
+        "blood_group",
         "primary_health_condition",
       ]);
     } else if (step === 2) {
@@ -162,6 +165,7 @@ const PatientOnboarding = () => {
           phone_number: data.phone_number,
           email: data.email,
           age: data.age,
+          blood_group: data.blood_group || null,
           primary_health_condition: data.primary_health_condition,
           doctor_name: data.doctor_name,
           specialty: data.specialty,
@@ -298,19 +302,48 @@ const PatientOnboarding = () => {
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="age">Age *</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    {...form.register("age", { valueAsNumber: true })}
-                    placeholder="25"
-                  />
-                  {form.formState.errors.age && (
-                    <p className="text-sm text-destructive mt-1">
-                      {form.formState.errors.age.message}
-                    </p>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="age">Age *</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      {...form.register("age", { valueAsNumber: true })}
+                      placeholder="25"
+                    />
+                    {form.formState.errors.age && (
+                      <p className="text-sm text-destructive mt-1">
+                        {form.formState.errors.age.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="blood_group">Blood Group</Label>
+                    <Select
+                      onValueChange={(value) => form.setValue("blood_group", value)}
+                      value={form.watch("blood_group")}
+                    >
+                      <SelectTrigger id="blood_group">
+                        <SelectValue placeholder="Select blood group" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        <SelectItem value="A+">A+</SelectItem>
+                        <SelectItem value="A-">A-</SelectItem>
+                        <SelectItem value="B+">B+</SelectItem>
+                        <SelectItem value="B-">B-</SelectItem>
+                        <SelectItem value="O+">O+</SelectItem>
+                        <SelectItem value="O-">O-</SelectItem>
+                        <SelectItem value="AB+">AB+</SelectItem>
+                        <SelectItem value="AB-">AB-</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.blood_group && (
+                      <p className="text-sm text-destructive mt-1">
+                        {form.formState.errors.blood_group.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div>
