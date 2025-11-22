@@ -305,7 +305,7 @@ const UpdateProfileForm = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label htmlFor="primary_health_condition">Primary Health Condition *</Label>
                 <Input
                   id="primary_health_condition"
