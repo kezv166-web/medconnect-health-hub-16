@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import ClinicRegistration from "@/components/doctor/ClinicRegistration";
 import PatientConnect from "@/components/doctor/PatientConnect";
+import DoctorSettings from "@/pages/DoctorSettings";
 import { supabase } from "@/integrations/supabase/client";
 type TabType = "clinic" | "patients" | "settings";
 const DoctorDashboard = () => {
@@ -130,8 +131,15 @@ const DoctorDashboard = () => {
             </div>}
 
           {activeTab === "settings" && <div className="animate-fade-in">
-              <h1 className="text-3xl font-bold text-foreground mb-4">Settings</h1>
-              <p className="text-muted-foreground">Settings coming soon...</p>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground mb-2">
+                  Settings
+                </h1>
+                <p className="text-muted-foreground">
+                  Manage your account settings and preferences
+                </p>
+              </div>
+              <DoctorSettings />
             </div>}
         </div>
       </main>
