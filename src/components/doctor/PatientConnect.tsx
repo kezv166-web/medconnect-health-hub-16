@@ -59,6 +59,7 @@ const PatientConnect = () => {
   });
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
   const [lastVisitDate, setLastVisitDate] = useState<Date>();
+  const [viewingPatient, setViewingPatient] = useState<Patient | null>(null);
 
   const handleSendInvite = () => {
     if (!referralData.email && !referralData.phone) {
@@ -245,7 +246,11 @@ const PatientConnect = () => {
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setViewingPatient(patient)}
+                    >
                       View Record
                     </Button>
                   </div>
@@ -255,6 +260,87 @@ const PatientConnect = () => {
           ))}
         </div>
       </div>
+
+      {/* Patient Record View Dialog */}
+      <Dialog open={!!viewingPatient} onOpenChange={() => setViewingPatient(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Patient Record</DialogTitle>
+            <DialogDescription>
+              View patient details and prescription information
+            </DialogDescription>
+          </DialogHeader>
+          
+          {viewingPatient && (
+            <div className="space-y-6 py-4">
+              {/* Patient Info */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Patient Name</Label>
+                  <p className="text-lg font-semibold">{viewingPatient.name}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Email</Label>
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-sm">{viewingPatient.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Phone Number</Label>
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-sm">{viewingPatient.phone}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Last Visit</Label>
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm">
+                      {new Date(viewingPatient.lastVisit).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Prescription Image */}
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Prescription</Label>
+                  <div className="border rounded-lg p-4 bg-muted/30">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Upload className="w-4 h-4" />
+                      <span>Prescription image will be displayed here</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button className="flex-1">
+                  Edit Record
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setViewingPatient(null)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
