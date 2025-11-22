@@ -62,11 +62,28 @@ const Auth = () => {
       }
 
       if (authData.user) {
+        // Check user role
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", authData.user.id)
+          .single();
+
+        const role = roleData?.role;
+
         toast({
           title: "Welcome back!",
           description: "You've successfully logged in.",
         });
-        navigate("/patient-dashboard");
+
+        // Route based on role
+        if (role === "doctor") {
+          navigate("/doctor-dashboard");
+        } else if (role === "hospital") {
+          navigate("/hospital-dashboard");
+        } else {
+          navigate("/patient-dashboard");
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);
