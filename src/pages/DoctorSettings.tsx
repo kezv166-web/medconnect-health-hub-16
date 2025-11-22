@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, Trash2, AlertTriangle } from "lucide-react";
+import { Lock, Trash2, AlertTriangle, Shield, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -178,136 +178,246 @@ const DoctorSettings = () => {
     }
   };
 
+  const getPasswordStrength = (password: string) => {
+    if (password.length === 0) return { strength: 0, label: "", color: "" };
+    if (password.length < 6) return { strength: 25, label: "Weak", color: "bg-destructive" };
+    if (password.length < 10) return { strength: 50, label: "Fair", color: "bg-warning" };
+    if (password.length < 14) return { strength: 75, label: "Good", color: "bg-success" };
+    return { strength: 100, label: "Strong", color: "bg-success" };
+  };
+
+  const passwordStrength = getPasswordStrength(newPassword);
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10">
+            <Shield className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Account Security</h1>
+            <p className="text-muted-foreground">Manage your password and account settings</p>
+          </div>
+        </div>
+      </div>
+
       {/* Change Password */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lock className="w-5 h-5 text-primary" />
-            Change Password
-          </CardTitle>
-          <CardDescription>Update your account password</CardDescription>
+      <Card className="border-primary/20 shadow-lg overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-primary/70 to-primary/30" />
+        <CardHeader className="space-y-3 pb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20">
+              <Lock className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Change Password</CardTitle>
+              <CardDescription className="text-base">
+                Keep your account secure with a strong password
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword">Current Password</Label>
-            <Input
-              id="currentPassword"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Enter current password"
-            />
+        <CardContent className="space-y-6">
+          <div className="space-y-5">
+            <div className="space-y-2.5">
+              <Label htmlFor="currentPassword" className="text-sm font-medium flex items-center gap-2">
+                <Key className="w-4 h-4 text-muted-foreground" />
+                Current Password
+              </Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter your current password"
+                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+            <div className="space-y-2.5">
+              <Label htmlFor="newPassword" className="text-sm font-medium flex items-center gap-2">
+                <Lock className="w-4 h-4 text-muted-foreground" />
+                New Password
+              </Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password (minimum 6 characters)"
+                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+              />
+              {newPassword && (
+                <div className="space-y-2 animate-fade-in">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-muted-foreground">Password strength:</span>
+                    <span className={`font-medium ${
+                      passwordStrength.strength === 100 ? 'text-success' :
+                      passwordStrength.strength >= 50 ? 'text-warning' :
+                      'text-destructive'
+                    }`}>
+                      {passwordStrength.label}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full ${passwordStrength.color} transition-all duration-300 rounded-full`}
+                      style={{ width: `${passwordStrength.strength}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2.5">
+              <Label htmlFor="confirmPassword" className="text-sm font-medium flex items-center gap-2">
+                <Lock className="w-4 h-4 text-muted-foreground" />
+                Confirm New Password
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter your new password"
+                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+              />
+              {confirmPassword && newPassword !== confirmPassword && (
+                <p className="text-xs text-destructive animate-fade-in">Passwords do not match</p>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Enter new password (min 6 characters)"
-            />
+          <div className="pt-4">
+            <Button 
+              onClick={handleChangePassword} 
+              disabled={changingPassword}
+              className="w-full sm:w-auto h-11 px-8 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              {changingPassword ? "Updating Password..." : "Update Password"}
+            </Button>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter new password"
-            />
-          </div>
-
-          <Button 
-            onClick={handleChangePassword} 
-            disabled={changingPassword}
-            className="w-full sm:w-auto"
-          >
-            {changingPassword ? "Changing Password..." : "Change Password"}
-          </Button>
         </CardContent>
       </Card>
 
       {/* Delete Account */}
-      <Card className="border-destructive/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <Trash2 className="w-5 h-5" />
-            Delete Account
-          </CardTitle>
-          <CardDescription>
-            Permanently delete your doctor account and all associated data
-          </CardDescription>
+      <Card className="border-destructive/30 shadow-lg overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-destructive via-destructive/70 to-destructive/30" />
+        <CardHeader className="space-y-3 pb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
+              <Trash2 className="w-5 h-5 text-destructive" />
+            </div>
+            <div>
+              <CardTitle className="text-xl text-destructive">Danger Zone</CardTitle>
+              <CardDescription className="text-base">
+                Permanently delete your account and all associated data
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-2">
-            <div className="flex gap-2">
-              <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-semibold text-foreground">Warning: This action is irreversible</p>
-                <p className="text-sm text-muted-foreground">
-                  Deleting your account will permanently remove:
-                </p>
-                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 ml-1">
-                  <li>Your clinic profile and information</li>
-                  <li>All patient connections and data</li>
-                  <li>Your account credentials and login access</li>
-                  <li>All settings and preferences</li>
-                </ul>
+        <CardContent className="space-y-6">
+          <div className="bg-gradient-to-br from-destructive/10 via-destructive/5 to-transparent border-2 border-destructive/20 rounded-xl p-6 space-y-4">
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <div className="p-2 rounded-lg bg-destructive/10 border border-destructive/20">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-semibold text-foreground text-base mb-1">
+                    ⚠️ This action is permanent and irreversible
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Once you delete your account, there is no going back. Please be certain.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">The following will be permanently deleted:</p>
+                  <ul className="text-sm text-muted-foreground space-y-1.5 ml-1">
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Your clinic profile and all associated information</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>All patient connections and referral data</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Your account credentials and login access</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>All preferences, settings, and customizations</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-start space-x-3 p-4 rounded-lg bg-muted/50 border border-border">
             <Checkbox
               id="deleteConfirm"
               checked={deleteConfirmation}
               onCheckedChange={(checked) => setDeleteConfirmation(checked as boolean)}
+              className="mt-0.5"
             />
             <Label
               htmlFor="deleteConfirm"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              className="text-sm font-medium leading-relaxed cursor-pointer"
             >
-              I understand this action cannot be undone
+              I understand this action is permanent and cannot be undone. I want to proceed with deleting my account.
             </Label>
           </div>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button 
-                variant="destructive" 
-                disabled={!deleteConfirmation}
-                className="w-full sm:w-auto"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Account
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete your doctor account and remove all your data from our servers. 
-                  This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteAccount}
-                  disabled={deletingAccount}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          <div className="pt-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="destructive" 
+                  disabled={!deleteConfirmation}
+                  className="w-full sm:w-auto h-11 px-8 shadow-md hover:shadow-lg transition-all duration-200"
                 >
-                  {deletingAccount ? "Deleting..." : "Delete Account"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete My Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-md">
+                <AlertDialogHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
+                      <AlertTriangle className="w-6 h-6 text-destructive" />
+                    </div>
+                    <AlertDialogTitle className="text-xl">Final Confirmation</AlertDialogTitle>
+                  </div>
+                  <AlertDialogDescription className="text-base leading-relaxed pt-2">
+                    This will <span className="font-semibold text-destructive">permanently delete</span> your doctor account 
+                    and remove all your data from our servers. This action <span className="font-semibold">cannot be undone</span>.
+                    <br /><br />
+                    Are you absolutely sure you want to continue?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="gap-2 sm:gap-0">
+                  <AlertDialogCancel className="h-11">Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deletingAccount}
+                    className="h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deletingAccount ? "Deleting..." : "Yes, Delete My Account"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </CardContent>
       </Card>
     </div>
