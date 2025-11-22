@@ -381,7 +381,7 @@ const ResourceControlCenter = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} size="lg" className="min-w-[200px]" disabled={loading}>
+        <Button onClick={handleSave} size="lg" className="min-w-[200px] bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={loading}>
           <Save className="w-4 h-4 mr-2" />
           {loading ? "Saving..." : "Save All Changes"}
         </Button>
