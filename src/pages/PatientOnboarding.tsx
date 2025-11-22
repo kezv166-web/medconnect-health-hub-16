@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Plus, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
+import { CalendarIcon, Plus, Trash2, ArrowRight, ArrowLeft, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ClockPicker } from "@/components/ui/clock-picker";
 
 // Zod validation schemas
 const step1Schema = z.object({
@@ -474,19 +473,29 @@ const PatientOnboarding = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium">
+                        <Label className="flex items-center gap-2 text-sm font-medium">
+                          <Clock className="h-4 w-4 text-primary" />
                           Time of Day *
                         </Label>
-                        <ClockPicker
-                          value={form.watch(`medicines.${index}.time`)}
-                          onChange={(time) => {
-                            const [timeOnly, period] = time.split(" ");
-                            const [hours] = timeOnly.split(":");
-                            form.setValue(`medicines.${index}.time`, timeOnly);
-                            form.setValue(`medicines.${index}.period`, period as "AM" | "PM");
-                          }}
-                          className="w-full"
-                        />
+                        <div className="flex gap-3">
+                          <Input
+                            {...form.register(`medicines.${index}.time`)}
+                            placeholder="9:00"
+                            className="flex-1 h-11 focus:ring-2 focus:ring-primary/20"
+                          />
+                          <Select 
+                            value={form.watch(`medicines.${index}.period`)} 
+                            onValueChange={value => form.setValue(`medicines.${index}.period`, value as "AM" | "PM")}
+                          >
+                            <SelectTrigger className="w-24 h-11 font-medium">
+                              <SelectValue placeholder="AM/PM" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background z-50">
+                              <SelectItem value="AM">AM</SelectItem>
+                              <SelectItem value="PM">PM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                         {form.formState.errors.medicines?.[index]?.time && <p className="text-sm text-destructive mt-1">
                             {form.formState.errors.medicines[index]?.time?.message}
                           </p>}
