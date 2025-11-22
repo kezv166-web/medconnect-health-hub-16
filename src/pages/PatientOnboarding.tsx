@@ -473,17 +473,32 @@ const PatientOnboarding = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor={`medicines.${index}.time`} className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
+                        <Label htmlFor={`medicines.${index}.time`} className="flex items-center gap-2 text-sm font-medium">
+                          <Clock className="h-4 w-4 text-primary" />
                           Time of Day *
                         </Label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-3">
                           <div className="relative flex-1">
-                            <Input id={`medicines.${index}.time`} {...form.register(`medicines.${index}.time`)} placeholder="09:00" type="time" className="transition-all duration-200 hover:border-primary/50 focus:border-primary pr-2" />
+                            <Input 
+                              id={`medicines.${index}.time`} 
+                              {...form.register(`medicines.${index}.time`)} 
+                              placeholder="09:00" 
+                              type="time" 
+                              className="h-11 text-base font-medium transition-all duration-200 hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                            />
                           </div>
-                          
+                          <Input
+                            {...form.register(`medicines.${index}.period`)}
+                            placeholder="AM"
+                            maxLength={2}
+                            className="w-24 h-11 text-center uppercase text-base font-semibold transition-all duration-200 hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            onChange={(e) => {
+                              const value = e.target.value.toUpperCase();
+                              form.setValue(`medicines.${index}.period`, value as "AM" | "PM");
+                            }}
+                          />
                         </div>
-                        {form.formState.errors.medicines?.[index]?.time && <p className="text-sm text-destructive">
+                        {form.formState.errors.medicines?.[index]?.time && <p className="text-sm text-destructive mt-1">
                             {form.formState.errors.medicines[index]?.time?.message}
                           </p>}
                       </div>
