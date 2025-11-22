@@ -13,7 +13,7 @@ import TodayScheduleView from "@/components/medicine/TodayScheduleView";
 import NextDoseWidget from "@/components/medicine/NextDoseWidget";
 import AdherenceAreaChart from "@/components/medicine/AdherenceAreaChart";
 
-type SidebarItem = "home" | "profile" | "medicines" | "nearby" | "form";
+type SidebarItem = "home" | "profile" | "nearby" | "form";
 
 const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState<SidebarItem>("home");
@@ -82,12 +82,6 @@ const PatientDashboard = () => {
         {activeTab === "profile" && (
           <div className="p-6 animate-fade-in">
             <ProfileSettings />
-          </div>
-        )}
-
-        {activeTab === "medicines" && (
-          <div className="p-6 animate-fade-in">
-            <MedicineManagement />
           </div>
         )}
 
