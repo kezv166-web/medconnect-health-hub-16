@@ -50,14 +50,8 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // For testing with Resend's free tier, use the verified email
-    // In production, you would verify a domain and use the patient's actual email
     const recipientEmail = profile.email;
-    const isTestMode = recipientEmail !== "kezv166@gmail.com";
-    
-    if (isTestMode) {
-      console.log(`Test mode: Sending to verified email instead of ${recipientEmail}`);
-    }
+    console.log(`Sending email to patient's registered email: ${recipientEmail}`);
 
     // Get today's and tomorrow's dates
     const today = new Date();
@@ -213,11 +207,11 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    // Send email
-    // Note: In Resend test mode, we can only send to the verified email address
+    // Send email to patient's registered email
+    // Note: Change the 'from' address to your verified domain once you verify it on Resend
     const { error: emailError } = await resend.emails.send({
       from: 'Medicine Reminder <onboarding@resend.dev>',
-      to: ['kezv166@gmail.com'], // Using verified email for test mode
+      to: [recipientEmail],
       subject: `💊 Your Medicine Schedule - ${today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
       html: emailHtml,
     });
@@ -227,8 +221,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to send email', 
-          details: emailError,
-          note: 'To send to other emails, verify a domain at resend.com/domains'
+          details: emailError
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -240,14 +233,13 @@ const handler = async (req: Request): Promise<Response> => {
       .update({ last_email_sent_date: todayStr })
       .eq("user_id", userId);
 
-    console.log('Email sent successfully to: kezv166@gmail.com (test mode)');
+    console.log(`Email sent successfully to: ${recipientEmail}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Email sent successfully',
-        recipient: 'kezv166@gmail.com',
-        note: 'Test mode: Email sent to verified address. To use custom domains, verify at resend.com/domains'
+        recipient: recipientEmail
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
