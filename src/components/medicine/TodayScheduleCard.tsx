@@ -81,7 +81,7 @@ export default function TodayScheduleCard({
         label: "✓ Medicine taken",
         disabled: true,
         variant: "default" as const,
-        className: "bg-success hover:bg-success text-white cursor-not-allowed"
+        className: "bg-primary hover:bg-primary/90 text-white cursor-not-allowed"
       };
     }
     
