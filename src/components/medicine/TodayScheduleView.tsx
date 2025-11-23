@@ -215,21 +215,35 @@ export default function TodayScheduleView() {
           const frequency = medicine.frequency.toLowerCase();
           const timing = medicine.timings.toLowerCase();
           
+          // Use the actual time and period from medicine if available, otherwise use defaults
+          const medicineTime = medicine.time || "9:00";
+          const medicinePeriod = medicine.period || "AM";
+          const medicineTimeFormatted = `${medicineTime} ${medicinePeriod}`;
+          
+          // Determine daypart from the time
+          const [time, period] = medicineTimeFormatted.split(" ");
+          const [hours] = time.split(":");
+          let hour = parseInt(hours);
+          if (period === "PM" && hour !== 12) hour += 12;
+          if (period === "AM" && hour === 12) hour = 0;
+          
+          let determinedDaypart: "Morning" | "Afternoon" | "Evening" | "Night" = "Morning";
+          if (hour >= 6 && hour < 12) determinedDaypart = "Morning";
+          else if (hour >= 12 && hour < 18) determinedDaypart = "Afternoon";
+          else if (hour >= 18 && hour < 21) determinedDaypart = "Evening";
+          else determinedDaypart = "Night";
+          
           // Parse frequency to determine occurrences
           let occurrenceTimes: { time: string; daypart: "Morning" | "Afternoon" | "Evening" | "Night" }[] = [];
           
           if (frequency.includes("once")) {
-            // Once daily - use timing to determine when
-            if (timing.includes("before")) {
-              occurrenceTimes.push({ time: "08:00 AM", daypart: "Morning" });
-            } else {
-              occurrenceTimes.push({ time: "09:00 AM", daypart: "Morning" });
-            }
+            // Use the actual time from medicine
+            occurrenceTimes.push({ time: medicineTimeFormatted, daypart: determinedDaypart });
           } else if (frequency.includes("twice")) {
-            occurrenceTimes.push({ time: "08:00 AM", daypart: "Morning" });
+            occurrenceTimes.push({ time: medicineTimeFormatted, daypart: determinedDaypart });
             occurrenceTimes.push({ time: "08:00 PM", daypart: "Evening" });
           } else if (frequency.includes("three")) {
-            occurrenceTimes.push({ time: "08:00 AM", daypart: "Morning" });
+            occurrenceTimes.push({ time: medicineTimeFormatted, daypart: determinedDaypart });
             occurrenceTimes.push({ time: "02:00 PM", daypart: "Afternoon" });
             occurrenceTimes.push({ time: "08:00 PM", daypart: "Evening" });
           }
