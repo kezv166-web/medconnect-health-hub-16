@@ -217,13 +217,16 @@ export type Database = {
           created_at: string
           doctor_name: string
           email: string
+          email_notifications_enabled: boolean | null
           full_name: string
           hospital_clinic_name: string
           id: string
           last_consultation_date: string
+          last_email_sent_date: string | null
           next_follow_up_date: string
           phone_number: string
           primary_health_condition: string
+          push_notifications_enabled: boolean | null
           specialty: string
           updated_at: string
           user_id: string
@@ -237,13 +240,16 @@ export type Database = {
           created_at?: string
           doctor_name: string
           email: string
+          email_notifications_enabled?: boolean | null
           full_name: string
           hospital_clinic_name: string
           id?: string
           last_consultation_date: string
+          last_email_sent_date?: string | null
           next_follow_up_date: string
           phone_number: string
           primary_health_condition: string
+          push_notifications_enabled?: boolean | null
           specialty: string
           updated_at?: string
           user_id: string
@@ -257,13 +263,16 @@ export type Database = {
           created_at?: string
           doctor_name?: string
           email?: string
+          email_notifications_enabled?: boolean | null
           full_name?: string
           hospital_clinic_name?: string
           id?: string
           last_consultation_date?: string
+          last_email_sent_date?: string | null
           next_follow_up_date?: string
           phone_number?: string
           primary_health_condition?: string
+          push_notifications_enabled?: boolean | null
           specialty?: string
           updated_at?: string
           user_id?: string

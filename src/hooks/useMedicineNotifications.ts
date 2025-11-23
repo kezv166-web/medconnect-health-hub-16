@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface ScheduledNotification {
@@ -8,6 +8,14 @@ interface ScheduledNotification {
   scheduledTime: Date;
   notified: boolean;
   reminderSent: boolean;
+}
+
+interface ServiceWorkerMessage {
+  type: string;
+  data: {
+    occurrenceId: string;
+    medicineName: string;
+  };
 }
 
 export function useMedicineNotifications(
@@ -21,8 +29,24 @@ export function useMedicineNotifications(
 ) {
   const notificationMap = useRef<Map<string, ScheduledNotification>>(new Map());
   const intervalRef = useRef<NodeJS.Timeout>();
+  const [serviceWorkerReady, setServiceWorkerReady] = useState(false);
 
   useEffect(() => {
+    // Check for service worker support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(() => {
+        setServiceWorkerReady(true);
+        console.log('Service Worker ready for notifications');
+      });
+
+      // Listen for messages from service worker
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      };
+    }
+
     // Request notification permission
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().then((permission) => {
@@ -103,8 +127,54 @@ export function useMedicineNotifications(
     });
   };
 
+  const handleServiceWorkerMessage = (event: MessageEvent<ServiceWorkerMessage>) => {
+    const { type, data } = event.data;
+
+    if (type === 'MARK_MEDICINE_TAKEN') {
+      toast.success(`Marked ${data.medicineName} as taken`);
+      // You can add logic here to update the backend
+    } else if (type === 'SNOOZE_MEDICINE') {
+      toast.info(`Snoozed ${data.medicineName} for 10 minutes`);
+      // Reschedule notification
+    }
+  };
+
   const sendNotification = (title: string, body: string, occurrenceId: string) => {
-    // Browser notification
+    const schedule = schedules.find(s => s.occurrenceId === occurrenceId);
+    
+    // Try Service Worker push notification first (works even when app is closed)
+    if (serviceWorkerReady && 'serviceWorker' in navigator && Notification.permission === "granted") {
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.showNotification(title, {
+          body,
+          icon: "/favicon.ico",
+          badge: "/favicon.ico",
+          tag: occurrenceId,
+          requireInteraction: true,
+          data: {
+            occurrenceId,
+            medicineName: schedule?.medicineName || "Medicine",
+            dosage: schedule?.dosage || "",
+          }
+        } as any);
+      }).catch((error) => {
+        console.error('Service Worker notification failed:', error);
+        // Fallback to regular notification
+        showFallbackNotification(title, body, occurrenceId);
+      });
+    } else {
+      // Fallback for browsers without service worker support
+      showFallbackNotification(title, body, occurrenceId);
+    }
+
+    // Always show in-app toast
+    toast.info(title, {
+      description: body,
+      duration: 10000,
+    });
+  };
+
+  const showFallbackNotification = (title: string, body: string, occurrenceId: string) => {
     if ("Notification" in window && Notification.permission === "granted") {
       const notification = new Notification(title, {
         body,
@@ -118,12 +188,6 @@ export function useMedicineNotifications(
         notification.close();
       };
     }
-
-    // In-app toast notification
-    toast.info(title, {
-      description: body,
-      duration: 10000,
-    });
   };
 
   return { sendNotification };
