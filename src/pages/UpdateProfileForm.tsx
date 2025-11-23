@@ -23,6 +23,7 @@ const medicineSchema = z.object({
   timings: z.string().min(1, "Timing is required"),
   duration_days: z.number().min(1, "Duration must be at least 1 day"),
   quantity_remaining: z.number().min(0, "Quantity cannot be negative"),
+  food_instruction: z.enum(["before_food", "after_food"]).default("after_food"),
 });
 
 const profileSchema = z.object({
@@ -119,6 +120,7 @@ const UpdateProfileForm = () => {
             timings: med.timings,
             duration_days: med.duration_days,
             quantity_remaining: med.quantity_remaining,
+            food_instruction: (med.food_instruction || "after_food") as "before_food" | "after_food",
           })));
         }
       }
@@ -176,6 +178,7 @@ const UpdateProfileForm = () => {
         timings: med.timings,
         duration_days: med.duration_days,
         quantity_remaining: med.quantity_remaining,
+        food_instruction: med.food_instruction,
       }));
 
       const { error: medicinesError } = await supabase
@@ -190,7 +193,7 @@ const UpdateProfileForm = () => {
         medicine_name: med.medicine_name,
         dosage: med.dosage,
         time_slot: med.timings as 'morning' | 'afternoon' | 'evening' | 'night',
-        instruction: 'after_food' as const,
+        instruction: med.food_instruction as 'before_food' | 'after_food',
       }));
 
       const { error: schedulesError } = await supabase
@@ -587,6 +590,24 @@ const UpdateProfileForm = () => {
                       </p>
                     )}
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>Food Instruction *</Label>
+                    <Select
+                      value={form.watch(`medicines.${index}.food_instruction`) || "after_food"}
+                      onValueChange={(value: "before_food" | "after_food") => 
+                        form.setValue(`medicines.${index}.food_instruction`, value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select instruction" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="before_food">Before Food</SelectItem>
+                        <SelectItem value="after_food">After Food</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             ))}
@@ -603,6 +624,7 @@ const UpdateProfileForm = () => {
                   timings: "morning",
                   duration_days: 30,
                   quantity_remaining: 0,
+                  food_instruction: "after_food",
                 })
               }
             >

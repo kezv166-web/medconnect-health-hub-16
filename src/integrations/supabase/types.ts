@@ -150,6 +150,9 @@ export type Database = {
           created_at: string
           dosage: string
           duration_days: number
+          food_instruction:
+            | Database["public"]["Enums"]["food_instruction_enum"]
+            | null
           frequency: string
           id: string
           medicine_name: string
@@ -162,6 +165,9 @@ export type Database = {
           created_at?: string
           dosage: string
           duration_days: number
+          food_instruction?:
+            | Database["public"]["Enums"]["food_instruction_enum"]
+            | null
           frequency: string
           id?: string
           medicine_name: string
@@ -174,6 +180,9 @@ export type Database = {
           created_at?: string
           dosage?: string
           duration_days?: number
+          food_instruction?:
+            | Database["public"]["Enums"]["food_instruction_enum"]
+            | null
           frequency?: string
           id?: string
           medicine_name?: string
