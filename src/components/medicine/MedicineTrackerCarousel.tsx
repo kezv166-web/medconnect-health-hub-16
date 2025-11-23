@@ -205,7 +205,7 @@ export default function MedicineTrackerCarousel() {
                             {taken ? (
                               <Button
                                 variant="default"
-                                className="w-full bg-green-600 hover:bg-green-700"
+                                className="w-full bg-primary hover:bg-primary/90"
                                 disabled
                               >
                                 ✓ Intaked
