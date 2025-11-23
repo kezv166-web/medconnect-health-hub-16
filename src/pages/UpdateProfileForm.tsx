@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, parseISO } from "date-fns";
-import { CalendarIcon, Plus, Trash2, Save, User, Stethoscope, Pill } from "lucide-react";
+import { CalendarIcon, Plus, Trash2, Save, User, Stethoscope, Pill, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,8 @@ const medicineSchema = z.object({
   dosage: z.string().min(1, "Dosage is required"),
   frequency: z.string().min(1, "Frequency is required"),
   timings: z.string().min(1, "Timing is required"),
+  time: z.string().min(1, "Time is required"),
+  period: z.enum(["AM", "PM"]),
   duration_days: z.number().min(1, "Duration must be at least 1 day"),
   quantity_remaining: z.number().min(0, "Quantity cannot be negative"),
   food_instruction: z.enum(["before_food", "after_food"]).default("after_food"),
@@ -118,6 +120,8 @@ const UpdateProfileForm = () => {
             dosage: med.dosage,
             frequency: med.frequency,
             timings: med.timings,
+            time: med.time || "9:00",
+            period: (med.period || "AM") as "AM" | "PM",
             duration_days: med.duration_days,
             quantity_remaining: med.quantity_remaining,
             food_instruction: (med.food_instruction || "after_food") as "before_food" | "after_food",
@@ -176,6 +180,8 @@ const UpdateProfileForm = () => {
         dosage: med.dosage,
         frequency: med.frequency,
         timings: med.timings,
+        time: med.time,
+        period: med.period,
         duration_days: med.duration_days,
         quantity_remaining: med.quantity_remaining,
         food_instruction: med.food_instruction,
@@ -564,6 +570,39 @@ const UpdateProfileForm = () => {
                   </div>
 
                   <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      Time of Day *
+                    </Label>
+                    <div className="flex gap-3">
+                      <Input
+                        {...form.register(`medicines.${index}.time`)}
+                        placeholder="9:00"
+                        className="flex-1"
+                      />
+                      <Select
+                        value={form.watch(`medicines.${index}.period`) || "AM"}
+                        onValueChange={(value: "AM" | "PM") => 
+                          form.setValue(`medicines.${index}.period`, value)
+                        }
+                      >
+                        <SelectTrigger className="w-24">
+                          <SelectValue placeholder="AM/PM" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AM">AM</SelectItem>
+                          <SelectItem value="PM">PM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {form.formState.errors.medicines?.[index]?.time && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.medicines[index]?.time?.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
                     <Label>Duration (days) *</Label>
                     <Input
                       type="number"
@@ -622,6 +661,8 @@ const UpdateProfileForm = () => {
                   dosage: "",
                   frequency: "Once daily",
                   timings: "morning",
+                  time: "9:00",
+                  period: "AM",
                   duration_days: 30,
                   quantity_remaining: 0,
                   food_instruction: "after_food",
