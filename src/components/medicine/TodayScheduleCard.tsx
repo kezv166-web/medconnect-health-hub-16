@@ -37,7 +37,7 @@ export default function TodayScheduleCard({
     switch (occurrence.status) {
       case "Taken":
         return (
-          <Badge className="bg-success text-white">
+          <Badge className="bg-primary text-white">
             <Check className="w-3 h-3 mr-1" />
             Taken
           </Badge>
