@@ -333,7 +333,7 @@ const UpdateProfileForm = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Stethoscope className="w-5 h-5 text-success" />
+              <Stethoscope className="w-5 h-5 text-primary" />
               Doctor & Clinic Information
             </CardTitle>
             <CardDescription>Your primary care physician details</CardDescription>
