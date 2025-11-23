@@ -41,6 +41,7 @@ const PatientSidebar = ({ activeTab, onTabChange, userName = "Patient" }: Patien
           variant="ghost"
           size="icon"
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="hover:bg-primary/10 hover:text-primary"
         >
           {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
