@@ -145,6 +145,18 @@ export default function TodayScheduleView() {
         .select("*")
         .eq("patient_id", profile.id);
 
+      // Build a map from medicine name + dosage to time/period from medicines table
+      const medicineTimeMap = new Map<string, { time: string | null; period: string | null }>();
+      if (medicinesData && medicinesData.length > 0) {
+        medicinesData.forEach((medicine) => {
+          const key = `${medicine.medicine_name.toLowerCase()}|${medicine.dosage}`;
+          medicineTimeMap.set(key, {
+            time: medicine.time,
+            period: medicine.period,
+          });
+        });
+      }
+
       const allOccurrences: MedicineOccurrence[] = [];
       const scheduledMedicineNames = new Set<string>();
 
@@ -168,14 +180,26 @@ export default function TodayScheduleView() {
         });
 
         schedulesData.forEach((schedule) => {
-          const scheduledTimeLocal = parseScheduleTime(schedule.time_slot);
-          const daypart = timeSlotToDaypart(schedule.time_slot);
-          
+          const key = `${schedule.medicine_name.toLowerCase()}|${schedule.dosage}`;
+          const medicineTime = medicineTimeMap.get(key);
+
+          // Prefer the exact time from medicines table if available
+          const baseTime = medicineTime?.time || "9:00";
+          const basePeriod = medicineTime?.period || "AM";
+          const scheduledTimeLocal = `${baseTime} ${basePeriod}`;
+
+          // Determine daypart from actual time if we have it, otherwise from time_slot
           const [time, period] = scheduledTimeLocal.split(" ");
           const [hours, minutes] = time.split(":");
           let hour = parseInt(hours);
           if (period === "PM" && hour !== 12) hour += 12;
           if (period === "AM" && hour === 12) hour = 0;
+
+          let daypart: "Morning" | "Afternoon" | "Evening" | "Night" = "Morning";
+          if (hour >= 6 && hour < 12) daypart = "Morning";
+          else if (hour >= 12 && hour < 18) daypart = "Afternoon";
+          else if (hour >= 18 && hour < 21) daypart = "Evening";
+          else daypart = "Night";
           
           const scheduledDateTime = new Date();
           scheduledDateTime.setHours(hour, parseInt(minutes), 0, 0);
