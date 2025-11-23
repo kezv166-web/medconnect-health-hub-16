@@ -98,7 +98,7 @@ const PatientSidebar = ({ activeTab, onTabChange, userName = "Patient" }: Patien
           </div>
           <Button
             variant="ghost"
-            className="w-full justify-start text-muted-foreground hover:text-foreground"
+            className="w-full justify-start text-muted-foreground hover:bg-primary/10 hover:text-primary"
             onClick={handleLogout}
           >
             <LogOut className="w-4 h-4 mr-2" />
