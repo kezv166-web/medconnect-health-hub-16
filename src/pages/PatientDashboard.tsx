@@ -12,8 +12,6 @@ import MedicineTrackerCarousel from "@/components/medicine/MedicineTrackerCarous
 import TodayScheduleView from "@/components/medicine/TodayScheduleView";
 import NextDoseWidget from "@/components/medicine/NextDoseWidget";
 import AdherenceAreaChart from "@/components/medicine/AdherenceAreaChart";
-import { NotificationSettings } from "@/components/notifications/NotificationSettings";
-import { toast } from "sonner";
 
 type SidebarItem = "home" | "profile" | "nearby" | "form";
 
@@ -31,31 +29,13 @@ const PatientDashboard = () => {
       if (user) {
         const { data } = await supabase
           .from('patient_profiles')
-          .select('full_name, last_email_sent_date, email_notifications_enabled')
+          .select('full_name')
           .eq('user_id', user.id)
           .maybeSingle();
         
         if (data) {
           setFullName(data.full_name);
           setPatientName(data.full_name.split(' ')[0]);
-
-          // Check if we should send daily email
-          const today = new Date().toISOString().split('T')[0];
-          const shouldSendEmail = data.email_notifications_enabled && 
-                                  (!data.last_email_sent_date || data.last_email_sent_date !== today);
-
-          if (shouldSendEmail) {
-            // Send daily email summary
-            supabase.functions.invoke("send-medicine-email", {
-              body: { userId: user.id }
-            }).then(({ error }) => {
-              if (error) {
-                console.error("Error sending daily email:", error);
-              } else {
-                console.log("Daily email sent successfully");
-              }
-            });
-          }
         }
       }
     };
@@ -98,9 +78,6 @@ const PatientDashboard = () => {
 
             {/* Adherence Analytics */}
             <AdherenceAreaChart />
-
-            {/* Notification Settings */}
-            <NotificationSettings />
 
             {/* Health Tips */}
             <HealthTips />
