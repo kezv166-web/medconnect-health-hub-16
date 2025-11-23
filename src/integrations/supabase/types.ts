@@ -157,7 +157,9 @@ export type Database = {
           id: string
           medicine_name: string
           patient_id: string
+          period: string | null
           quantity_remaining: number
+          time: string | null
           timings: string
           updated_at: string
         }
@@ -172,7 +174,9 @@ export type Database = {
           id?: string
           medicine_name: string
           patient_id: string
+          period?: string | null
           quantity_remaining: number
+          time?: string | null
           timings: string
           updated_at?: string
         }
@@ -187,7 +191,9 @@ export type Database = {
           id?: string
           medicine_name?: string
           patient_id?: string
+          period?: string | null
           quantity_remaining?: number
+          time?: string | null
           timings?: string
           updated_at?: string
         }
