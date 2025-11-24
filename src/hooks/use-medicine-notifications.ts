@@ -43,7 +43,7 @@ export const useMedicineNotifications = () => {
           
           if (!scheduleTime) return;
           
-          const notificationTime = new Date(scheduleTime.getTime() - 30 * 60 * 1000);
+          const notificationTime = scheduleTime; // Notify at exact medicine time
           const timeUntilNotification = notificationTime.getTime() - now.getTime();
 
           if (timeUntilNotification > 0 && timeUntilNotification < 24 * 60 * 60 * 1000) {
