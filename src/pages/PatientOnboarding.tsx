@@ -101,17 +101,34 @@ const PatientOnboarding = () => {
 
   // Auto-fill email from authenticated user
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
-      if (user?.email) {
-        form.setValue("email", user.email);
+    let mounted = true;
+    let unsubscribe: (() => void) | undefined;
+
+    const setupAuthListener = async () => {
+      // First, check if there's an existing session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (mounted && session?.user?.email) {
+        form.setValue("email", session.user.email);
       }
+
+      // Then listen for auth state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          if (mounted && session?.user?.email) {
+            form.setValue("email", session.user.email);
+          }
+        }
+      );
+      
+      unsubscribe = () => subscription.unsubscribe();
     };
-    getUser();
+
+    setupAuthListener();
+
+    return () => {
+      mounted = false;
+      unsubscribe?.();
+    };
   }, [form]);
   const validateStep = async (step: number) => {
     let isValid = false;
