@@ -143,7 +143,15 @@ export type Database = {
           time_slot?: Database["public"]["Enums"]["time_slot_enum"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "medicine_schedules_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patient_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       medicines: {
         Row: {
