@@ -12,6 +12,7 @@ import PatientOnboarding from "./pages/PatientOnboarding";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import HospitalDashboard from "./pages/HospitalDashboard";
 import AuthCallback from "./pages/AuthCallback";
+import InstallGuide from "./pages/InstallGuide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/install" element={<InstallGuide />} />
           <Route path="/patient-onboarding" element={<PatientOnboarding />} />
           <Route 
             path="/patient-dashboard" 
