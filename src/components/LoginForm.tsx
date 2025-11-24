@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { UserRole } from "./RoleSelector";
 import SecondaryAuthDialog from "./SecondaryAuthDialog";
+import GoogleAuthButton from "./auth/GoogleAuthButton";
 
 interface LoginFormProps {
   role: UserRole;
@@ -223,6 +224,11 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
                 >
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
+                <GoogleAuthButton 
+                  mode="login" 
+                  role="patient" 
+                  onError={setAuthError}
+                />
                 <p className="text-xs text-muted-foreground text-center mt-2">
                   Don't have an account? Switch to the <span className="font-semibold text-primary">Sign Up</span> tab above.
                 </p>
@@ -265,6 +271,11 @@ const LoginForm = ({ role, open, onClose }: LoginFormProps) => {
                 >
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>
+                <GoogleAuthButton 
+                  mode="signup" 
+                  role="patient" 
+                  onError={setAuthError}
+                />
               </form>
             </TabsContent>
           </Tabs>

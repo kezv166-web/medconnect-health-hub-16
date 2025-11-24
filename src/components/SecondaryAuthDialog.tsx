@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import GoogleAuthButton from "./auth/GoogleAuthButton";
 
 interface SecondaryAuthDialogProps {
   open: boolean;
@@ -216,6 +217,11 @@ const SecondaryAuthDialog = ({ open, onOpenChange, role, onSuccess }: SecondaryA
               >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
+              <GoogleAuthButton 
+                mode="login" 
+                role={role} 
+                onError={setAuthError}
+              />
               <p className="text-xs text-muted-foreground text-center mt-2">
                 Don't have an account? Switch to the <span className="font-semibold text-primary">Sign Up</span> tab above.
               </p>
@@ -258,6 +264,11 @@ const SecondaryAuthDialog = ({ open, onOpenChange, role, onSuccess }: SecondaryA
               >
                 {isLoading ? "Creating account..." : "Create Account"}
               </Button>
+              <GoogleAuthButton 
+                mode="signup" 
+                role={role} 
+                onError={setAuthError}
+              />
             </form>
           </TabsContent>
         </Tabs>
