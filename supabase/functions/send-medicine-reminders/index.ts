@@ -71,11 +71,8 @@ serve(async (req) => {
       const scheduleTime = new Date(now);
       scheduleTime.setHours(scheduleHour, 0, 0, 0);
       
-      // Notification should be sent 30 minutes before
-      const notificationTime = new Date(scheduleTime.getTime() - 30 * 60 * 1000);
-      
-      // Check if notification time is between now and 30 minutes from now
-      return notificationTime >= now && notificationTime <= thirtyMinutesLater;
+      // Check if the scheduled time is within the next 30 minutes (at medicine intake time)
+      return scheduleTime >= now && scheduleTime <= thirtyMinutesLater;
     });
 
     console.log(`Found ${upcomingSchedules?.length || 0} schedules needing notifications`);
@@ -142,8 +139,8 @@ serve(async (req) => {
               }
             },
             JSON.stringify({
-              title: '💊 Medicine Reminder',
-              body: `${timeSlotLabel}: Take ${scheduleAny.medicine_name} (${scheduleAny.dosage}) - ${scheduleAny.instruction.replace('_', ' ')}`,
+              title: '💊 Time to Take Your Medicine!',
+              body: `Take ${scheduleAny.medicine_name} (${scheduleAny.dosage}) - ${scheduleAny.instruction.replace('_', ' ')}`,
               tag: scheduleAny.id,
               url: '/patient-dashboard'
             })
