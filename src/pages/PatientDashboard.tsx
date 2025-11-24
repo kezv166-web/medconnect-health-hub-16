@@ -5,6 +5,7 @@ import StatusCards from "@/components/dashboard/StatusCards";
 import HealthTips from "@/components/dashboard/HealthTips";
 import MedicineManagement from "@/pages/MedicineManagement";
 import ProfileSettings from "@/pages/ProfileSettings";
+import PatientSettings from "@/pages/PatientSettings";
 import UpdateProfileForm from "@/pages/UpdateProfileForm";
 import NearbyServices from "@/pages/NearbyServices";
 import FloatingChatButton from "@/components/ai/FloatingChatButton";
@@ -17,7 +18,7 @@ import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { useMedicineNotifications } from "@/hooks/use-medicine-notifications";
 import { usePushSubscription } from "@/hooks/use-push-subscription";
 
-type SidebarItem = "home" | "profile" | "nearby" | "form";
+type SidebarItem = "home" | "profile" | "settings" | "nearby" | "form";
 
 const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState<SidebarItem>("home");
@@ -97,6 +98,12 @@ const PatientDashboard = () => {
         {activeTab === "profile" && (
           <div className="p-6 animate-fade-in">
             <ProfileSettings />
+          </div>
+        )}
+
+        {activeTab === "settings" && (
+          <div className="p-6 animate-fade-in">
+            <PatientSettings />
           </div>
         )}
 
