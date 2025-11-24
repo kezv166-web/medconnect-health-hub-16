@@ -15,6 +15,7 @@ import AdherenceAreaChart from "@/components/medicine/AdherenceAreaChart";
 import { NotificationPermission } from "@/components/notifications/NotificationPermission";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { useMedicineNotifications } from "@/hooks/use-medicine-notifications";
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 
 type SidebarItem = "home" | "profile" | "nearby" | "form";
 
@@ -24,6 +25,7 @@ const PatientDashboard = () => {
   const [fullName, setFullName] = useState("Patient");
 
   useMedicineNotifications();
+  usePushSubscription();
 
   useEffect(() => {
     // Always ensure we start on home tab
