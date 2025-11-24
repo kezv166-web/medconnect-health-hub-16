@@ -12,6 +12,9 @@ const Index = () => {
         <div className="max-w-7xl mx-auto text-center text-muted-foreground text-sm">
           <p>© 2024 MedConnect. Healthcare Connected.</p>
           <p className="mt-2">Secure • Reliable • Compliant</p>
+          <p className="mt-4">
+            <a href="/install" className="text-primary hover:underline">Install the App</a>
+          </p>
         </div>
       </footer>
     </div>

@@ -12,6 +12,9 @@ import MedicineTrackerCarousel from "@/components/medicine/MedicineTrackerCarous
 import TodayScheduleView from "@/components/medicine/TodayScheduleView";
 import NextDoseWidget from "@/components/medicine/NextDoseWidget";
 import AdherenceAreaChart from "@/components/medicine/AdherenceAreaChart";
+import { NotificationPermission } from "@/components/notifications/NotificationPermission";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { useMedicineNotifications } from "@/hooks/use-medicine-notifications";
 
 type SidebarItem = "home" | "profile" | "nearby" | "form";
 
@@ -19,6 +22,8 @@ const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState<SidebarItem>("home");
   const [patientName, setPatientName] = useState("Patient");
   const [fullName, setFullName] = useState("Patient");
+
+  useMedicineNotifications();
 
   useEffect(() => {
     // Always ensure we start on home tab
@@ -52,6 +57,9 @@ const PatientDashboard = () => {
       <main className="flex-1 lg:ml-64 overflow-x-hidden">
         {activeTab === "home" && (
           <div className="p-6 space-y-6 animate-fade-in max-w-full overflow-x-hidden">
+            {/* Notification Permission Prompt */}
+            <NotificationPermission />
+            
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -102,6 +110,9 @@ const PatientDashboard = () => {
           </div>
         )}
       </main>
+      
+      {/* Install App Prompt */}
+      <InstallPrompt />
     </div>
   );
 };
