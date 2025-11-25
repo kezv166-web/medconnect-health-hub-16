@@ -40,7 +40,7 @@ serve(async (req) => {
       'night': 21
     };
 
-    // Get all medicine schedules
+    // Get all medicine schedules with scheduled_time
     const { data: schedules, error: schedulesError } = await supabase
       .from('medicine_schedules')
       .select(`
@@ -48,6 +48,7 @@ serve(async (req) => {
         medicine_name,
         dosage,
         time_slot,
+        scheduled_time,
         instruction,
         patient_id,
         patient_profiles (
@@ -64,22 +65,34 @@ serve(async (req) => {
 
     console.log(`Found ${schedules?.length || 0} total schedules`);
 
-    // Filter schedules that need notifications NOW (within 5 minute buffer after scheduled time)
+    // Filter schedules that need notifications NOW (within ±2 minute buffer of scheduled time)
     const upcomingSchedules = schedules?.filter((schedule: any) => {
       if (!schedule.patient_profiles?.push_notifications_enabled) return false;
       
-      const scheduleHour = timeSlots[schedule.time_slot];
-      if (scheduleHour === undefined) return false;
+      // Use scheduled_time if available, otherwise fall back to time_slot
+      if (schedule.scheduled_time) {
+        const [schedHour, schedMin] = schedule.scheduled_time.split(':').map(Number);
+        const currentMinutes = currentHour * 60 + currentMinute;
+        const scheduledMinutes = schedHour * 60 + schedMin;
+        const timeDiff = Math.abs(currentMinutes - scheduledMinutes);
+        
+        // Send notification if within ±2 minutes
+        if (timeDiff <= 2) {
+          console.log(`✓ Scheduling reminder for ${schedule.medicine_name} at ${schedule.scheduled_time}`);
+          return true;
+        }
+      } else {
+        // Fallback to old time_slot logic
+        const scheduleHour = timeSlots[schedule.time_slot];
+        if (scheduleHour === undefined) return false;
 
-      // Send notification if:
-      // 1. We're at the exact hour (e.g., 8:00 for morning)
-      // 2. Within first 5 minutes of that hour (8:00-8:04)
-      const isCorrectHour = currentHour === scheduleHour;
-      const isWithinBuffer = currentMinute < 5;
-      
-      if (isCorrectHour && isWithinBuffer) {
-        console.log(`✓ Scheduling reminder for ${schedule.medicine_name} (${schedule.time_slot} at ${scheduleHour}:00)`);
-        return true;
+        const isCorrectHour = currentHour === scheduleHour;
+        const isWithinBuffer = currentMinute < 5;
+        
+        if (isCorrectHour && isWithinBuffer) {
+          console.log(`✓ Scheduling reminder for ${schedule.medicine_name} (${schedule.time_slot} at ${scheduleHour}:00)`);
+          return true;
+        }
       }
       
       return false;

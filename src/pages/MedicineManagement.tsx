@@ -13,6 +13,7 @@ export interface Medicine {
   medicine_name: string;
   dosage: string;
   time_slot: string;
+  scheduled_time?: string;
   instruction: string;
 }
 
@@ -51,6 +52,7 @@ const MedicineManagement = () => {
           medicine_name: med.medicine_name,
           dosage: med.dosage,
           time_slot: med.time_slot,
+          scheduled_time: med.scheduled_time || undefined,
           instruction: med.instruction,
         }));
         setMedicines(formattedMedicines);
