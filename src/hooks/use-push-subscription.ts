@@ -41,14 +41,14 @@ export const usePushSubscription = () => {
       }
 
       try {
-        // Wait for service worker to be ready with timeout
-        console.log('[Push] Waiting for service worker...');
-        const registration = await Promise.race([
-          navigator.serviceWorker.ready,
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Service worker timeout')), 10000)
-          )
-        ]) as ServiceWorkerRegistration;
+      // Wait for service worker to be ready with longer timeout
+      console.log('[Push] Waiting for service worker...');
+      const registration = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Service worker timeout')), 30000)
+        )
+      ]) as ServiceWorkerRegistration;
         
         console.log('[Push] Service worker ready, active:', registration.active?.state);
         
