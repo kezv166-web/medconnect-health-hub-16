@@ -1,5 +1,9 @@
-// Service Worker for Push Notifications
+// Service Worker for Push Notifications with PWA Precaching
 console.log('[SW] Service worker script loaded');
+
+// Workbox will inject the precache manifest here
+const precacheManifest = self.__WB_MANIFEST || [];
+console.log('[SW] Precache manifest:', precacheManifest.length, 'entries');
 
 // Install immediately and skip waiting
 self.addEventListener('install', (event) => {
