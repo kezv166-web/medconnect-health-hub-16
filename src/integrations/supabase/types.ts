@@ -120,6 +120,7 @@ export type Database = {
           instruction: Database["public"]["Enums"]["food_instruction_enum"]
           medicine_name: string
           patient_id: string
+          scheduled_time: string | null
           time_slot: Database["public"]["Enums"]["time_slot_enum"]
           updated_at: string
         }
@@ -130,6 +131,7 @@ export type Database = {
           instruction: Database["public"]["Enums"]["food_instruction_enum"]
           medicine_name: string
           patient_id: string
+          scheduled_time?: string | null
           time_slot: Database["public"]["Enums"]["time_slot_enum"]
           updated_at?: string
         }
@@ -140,6 +142,7 @@ export type Database = {
           instruction?: Database["public"]["Enums"]["food_instruction_enum"]
           medicine_name?: string
           patient_id?: string
+          scheduled_time?: string | null
           time_slot?: Database["public"]["Enums"]["time_slot_enum"]
           updated_at?: string
         }
@@ -211,6 +214,44 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patient_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          medicine_schedule_id: string | null
+          sent_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          medicine_schedule_id?: string | null
+          sent_at?: string | null
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          medicine_schedule_id?: string | null
+          sent_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_medicine_schedule_id_fkey"
+            columns: ["medicine_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "medicine_schedules"
             referencedColumns: ["id"]
           },
         ]
