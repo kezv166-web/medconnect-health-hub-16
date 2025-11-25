@@ -42,21 +42,31 @@ export const PushSubscriptionStatus = () => {
 
   const refreshSubscription = async () => {
     setIsRefreshing(true);
+    console.log('[PushStatus] Starting refresh subscription...');
+    
     try {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         throw new Error('Push notifications not supported');
       }
 
+      console.log('[PushStatus] Requesting notification permission...');
       const permission = await Notification.requestPermission();
+      console.log('[PushStatus] Permission result:', permission);
+      
       if (permission !== 'granted') {
         throw new Error('Notification permission denied');
       }
 
+      console.log('[PushStatus] Waiting for service worker...');
       const registration = await navigator.serviceWorker.ready;
+      console.log('[PushStatus] Service worker ready');
+      
       let subscription = await registration.pushManager.getSubscription();
+      console.log('[PushStatus] Existing subscription:', subscription ? 'Found, unsubscribing...' : 'None');
 
       if (subscription) {
         await subscription.unsubscribe();
+        console.log('[PushStatus] Unsubscribed from old subscription');
       }
 
       const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
@@ -64,6 +74,7 @@ export const PushSubscriptionStatus = () => {
         throw new Error('VAPID key not configured');
       }
 
+      console.log('[PushStatus] Creating new subscription with VAPID key...');
       const urlBase64ToUint8Array = (base64String: string) => {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
@@ -79,10 +90,12 @@ export const PushSubscriptionStatus = () => {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
       });
+      console.log('[PushStatus] ✅ New subscription created');
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      console.log('[PushStatus] Saving to database for user:', user.id);
       const subscriptionJSON = subscription.toJSON();
       const { error } = await supabase.from('push_subscriptions').upsert({
         user_id: user.id,
@@ -93,8 +106,12 @@ export const PushSubscriptionStatus = () => {
         onConflict: 'endpoint'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[PushStatus] Database error:', error);
+        throw error;
+      }
 
+      console.log('[PushStatus] ✅ Subscription saved to database');
       toast({
         title: "Subscription Refreshed",
         description: "Push notifications are now active",
@@ -102,6 +119,7 @@ export const PushSubscriptionStatus = () => {
 
       await checkSubscription();
     } catch (error) {
+      console.error('[PushStatus] Refresh failed:', error);
       toast({
         title: "Refresh Failed",
         description: error instanceof Error ? error.message : "Failed to refresh subscription",
