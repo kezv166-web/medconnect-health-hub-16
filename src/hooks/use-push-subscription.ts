@@ -57,20 +57,22 @@ export const usePushSubscription = () => {
         console.log('[Push] Existing subscription:', subscription ? 'Found' : 'Not found');
         
         if (!subscription) {
-          // Subscribe to push notifications
-          const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+          // Fetch VAPID public key from backend
+          console.log('[Push] Fetching VAPID key from backend...');
+          const { data: vapidData, error: vapidError } = await supabase.functions.invoke('get-vapid-key');
           
-          if (!publicVapidKey) {
-            console.error('[Push] VAPID public key not configured');
+          if (vapidError || !vapidData?.publicKey) {
+            console.error('[Push] Failed to fetch VAPID key:', vapidError);
             toast({
               title: "Configuration Error",
-              description: "Push notification keys are not configured",
+              description: "Failed to load push notification configuration",
               variant: "destructive",
             });
             return;
           }
 
-          console.log('[Push] VAPID key found, length:', publicVapidKey.length);
+          const publicVapidKey = vapidData.publicKey;
+          console.log('[Push] VAPID key fetched, length:', publicVapidKey.length);
           console.log('[Push] Creating new push subscription...');
           
           try {

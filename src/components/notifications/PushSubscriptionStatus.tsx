@@ -69,12 +69,16 @@ export const PushSubscriptionStatus = () => {
         console.log('[PushStatus] Unsubscribed from old subscription');
       }
 
-      const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-      if (!publicVapidKey) {
-        throw new Error('VAPID key not configured');
+      console.log('[PushStatus] Fetching VAPID key from backend...');
+      const { data: vapidData, error: vapidError } = await supabase.functions.invoke('get-vapid-key');
+      
+      if (vapidError || !vapidData?.publicKey) {
+        console.error('[PushStatus] Failed to fetch VAPID key:', vapidError);
+        throw new Error('Failed to load VAPID key from server');
       }
 
-      console.log('[PushStatus] Creating new subscription with VAPID key...');
+      const publicVapidKey = vapidData.publicKey;
+      console.log('[PushStatus] VAPID key fetched, creating new subscription...');
       const urlBase64ToUint8Array = (base64String: string) => {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
