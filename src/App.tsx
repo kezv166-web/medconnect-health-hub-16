@@ -13,6 +13,7 @@ import DoctorDashboard from "./pages/DoctorDashboard";
 import HospitalDashboard from "./pages/HospitalDashboard";
 import AuthCallback from "./pages/AuthCallback";
 import InstallGuide from "./pages/InstallGuide";
+import TestNotifications from "./pages/TestNotifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/install" element={<InstallGuide />} />
+          <Route path="/test-notifications" element={<TestNotifications />} />
           <Route path="/patient-onboarding" element={<PatientOnboarding />} />
           <Route 
             path="/patient-dashboard" 

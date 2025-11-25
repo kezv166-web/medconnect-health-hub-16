@@ -10,6 +10,7 @@ interface NextDose {
   medicine_name: string;
   dosage: string;
   time_slot: TimeSlot;
+  scheduled_time?: string;
   instruction: string;
 }
 
@@ -151,12 +152,20 @@ export default function NextDoseWidget() {
         <div className="flex-1">
           <p className="text-sm text-muted-foreground mb-1">Next Dose</p>
           <h3 className="font-bold text-lg">{nextDose.medicine_name}</h3>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
             <Badge variant="outline" className="text-xs">
               {nextDose.dosage}
             </Badge>
             <Badge variant="outline" className="text-xs">
-              {timeSlotLabels[nextDose.time_slot]}
+              {nextDose.scheduled_time ? (
+                new Date(`2000-01-01T${nextDose.scheduled_time}`).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                })
+              ) : (
+                timeSlotLabels[nextDose.time_slot]
+              )}
             </Badge>
             <Badge variant="secondary" className="text-xs">
               {nextDose.instruction.replace("_", " ")}

@@ -26,6 +26,7 @@ export default function MedicineSetupForm({ onSuccess, onCancel }: MedicineSetup
   const [medicineName, setMedicineName] = useState("");
   const [dosage, setDosage] = useState("");
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
+  const [selectedTime, setSelectedTime] = useState("08:00");
   const [instruction, setInstruction] = useState<FoodInstruction>("after_food");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,6 +76,7 @@ export default function MedicineSetupForm({ onSuccess, onCancel }: MedicineSetup
         medicine_name: medicineName.trim(),
         dosage: dosage.trim(),
         time_slot: timeSlot,
+        scheduled_time: selectedTime + ':00',
         instruction,
       }));
 
@@ -90,6 +92,7 @@ export default function MedicineSetupForm({ onSuccess, onCancel }: MedicineSetup
       setMedicineName("");
       setDosage("");
       setSelectedTimeSlots([]);
+      setSelectedTime("08:00");
       setInstruction("after_food");
       
       onSuccess?.();
@@ -123,6 +126,21 @@ export default function MedicineSetupForm({ onSuccess, onCancel }: MedicineSetup
           placeholder="e.g., 500mg, 1 tablet"
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="scheduled-time">Exact Time</Label>
+        <Input
+          id="scheduled-time"
+          type="time"
+          value={selectedTime}
+          onChange={(e) => setSelectedTime(e.target.value)}
+          required
+          className="w-full"
+        />
+        <p className="text-xs text-muted-foreground">
+          You'll receive a reminder at this exact time
+        </p>
       </div>
 
       <div className="space-y-3">

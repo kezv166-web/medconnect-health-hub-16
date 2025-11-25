@@ -57,8 +57,22 @@ const MedicineList = ({ medicines, onDelete }: MedicineListProps) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground capitalize">
-                      {medicine.time_slot}
+                    <span className="text-muted-foreground">
+                      {medicine.scheduled_time ? (
+                        <>
+                          <span className="capitalize">{medicine.time_slot}</span>
+                          {' - '}
+                          <span className="font-medium">
+                            {new Date(`2000-01-01T${medicine.scheduled_time}`).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true
+                            })}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="capitalize">{medicine.time_slot}</span>
+                      )}
                     </span>
                   </div>
 
