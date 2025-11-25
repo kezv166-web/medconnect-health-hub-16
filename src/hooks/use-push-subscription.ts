@@ -20,7 +20,24 @@ export const usePushSubscription = () => {
       // Check if notifications are granted
       if (Notification.permission !== 'granted') {
         console.log('[Push] Notification permission not granted:', Notification.permission);
-        return;
+        
+        // Request permission
+        try {
+          const permission = await Notification.requestPermission();
+          console.log('[Push] Permission request result:', permission);
+          
+          if (permission !== 'granted') {
+            toast({
+              title: "Notification Permission Denied",
+              description: "Please enable notifications in your browser settings",
+              variant: "destructive",
+            });
+            return;
+          }
+        } catch (error) {
+          console.error('[Push] Error requesting permission:', error);
+          return;
+        }
       }
 
       try {
@@ -33,7 +50,7 @@ export const usePushSubscription = () => {
           )
         ]) as ServiceWorkerRegistration;
         
-        console.log('[Push] Service worker ready');
+        console.log('[Push] Service worker ready, active:', registration.active?.state);
         
         // Check if already subscribed
         let subscription = await registration.pushManager.getSubscription();
@@ -53,12 +70,25 @@ export const usePushSubscription = () => {
             return;
           }
 
+          console.log('[Push] VAPID key found, length:', publicVapidKey.length);
           console.log('[Push] Creating new push subscription...');
-          subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-          });
-          console.log('[Push] Subscription created successfully');
+          
+          try {
+            subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+            });
+            console.log('[Push] ✅ Subscription created successfully');
+            console.log('[Push] Subscription endpoint:', subscription.endpoint.substring(0, 50) + '...');
+          } catch (subError) {
+            console.error('[Push] Failed to create subscription:', subError);
+            toast({
+              title: "Subscription Failed",
+              description: subError instanceof Error ? subError.message : "Could not create push subscription",
+              variant: "destructive",
+            });
+            return;
+          }
         }
 
         // Save subscription to database
@@ -67,6 +97,12 @@ export const usePushSubscription = () => {
           const subscriptionJSON = subscription.toJSON();
           
           console.log('[Push] Saving subscription to database for user:', user.id);
+          console.log('[Push] Subscription data:', {
+            endpoint: subscriptionJSON.endpoint?.substring(0, 50) + '...',
+            hasP256dh: !!subscriptionJSON.keys?.p256dh,
+            hasAuth: !!subscriptionJSON.keys?.auth
+          });
+          
           const { error } = await supabase.from('push_subscriptions').upsert({
             user_id: user.id,
             endpoint: subscriptionJSON.endpoint!,
@@ -80,16 +116,18 @@ export const usePushSubscription = () => {
             console.error('[Push] Database save error:', error);
             toast({
               title: "Subscription Error",
-              description: "Failed to save push subscription",
+              description: "Failed to save push subscription: " + error.message,
               variant: "destructive",
             });
           } else {
-            console.log('[Push] ✅ Push subscription saved successfully');
+            console.log('[Push] ✅ Push subscription saved successfully to database');
             toast({
               title: "Notifications Ready",
               description: "You'll receive medicine reminders on this device",
             });
           }
+        } else {
+          console.error('[Push] Missing user or subscription:', { hasUser: !!user, hasSubscription: !!subscription });
         }
       } catch (error) {
         console.error('[Push] Error subscribing to push:', error);
