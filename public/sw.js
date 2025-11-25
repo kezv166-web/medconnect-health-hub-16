@@ -1,39 +1,17 @@
-// Custom Service Worker for Push Notifications with Workbox
+// Service Worker for Push Notifications
+console.log('[SW] Service worker script loaded');
 
-// This will be replaced by the list of assets to precache
-const manifest = self.__WB_MANIFEST;
-
-// Precache all assets from the manifest
+// Install immediately and skip waiting
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open('medconnect-v1').then((cache) => {
-      return cache.addAll(manifest.map(entry => entry.url));
-    })
-  );
+  console.log('[SW] Installing service worker...');
   self.skipWaiting();
 });
 
-// Clean up old caches
+// Activate immediately and claim clients
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((cacheName) => cacheName.startsWith('medconnect-') && cacheName !== 'medconnect-v1')
-          .map((cacheName) => caches.delete(cacheName))
-      );
-    })
-  );
-  self.clients.claim();
-});
-
-// Handle fetch requests with cache-first strategy
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  console.log('[SW] Activating service worker...');
+  event.waitUntil(self.clients.claim());
+  console.log('[SW] Service worker activated');
 });
 
 // Listen for push events
