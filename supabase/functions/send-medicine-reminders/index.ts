@@ -25,9 +25,12 @@ serve(async (req) => {
 
     console.log('Checking for upcoming medicine reminders...');
 
-    // Get current time and 10 minutes from now for precise timing
+    // Get current time
     const now = new Date();
-    const tenMinutesLater = new Date(now.getTime() + 10 * 60 * 1000);
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    console.log(`Current time: ${currentHour}:${currentMinute.toString().padStart(2, '0')}`);
     
     // Define time slots and their corresponding hours
     const timeSlots: Record<string, number> = {
@@ -61,18 +64,25 @@ serve(async (req) => {
 
     console.log(`Found ${schedules?.length || 0} total schedules`);
 
-    // Filter schedules that need notifications in the next 10 minutes (at exact medicine time)
+    // Filter schedules that need notifications NOW (within 5 minute buffer after scheduled time)
     const upcomingSchedules = schedules?.filter((schedule: any) => {
       if (!schedule.patient_profiles?.push_notifications_enabled) return false;
       
       const scheduleHour = timeSlots[schedule.time_slot];
-      if (!scheduleHour) return false;
+      if (scheduleHour === undefined) return false;
 
-      const scheduleTime = new Date(now);
-      scheduleTime.setHours(scheduleHour, 0, 0, 0);
+      // Send notification if:
+      // 1. We're at the exact hour (e.g., 8:00 for morning)
+      // 2. Within first 5 minutes of that hour (8:00-8:04)
+      const isCorrectHour = currentHour === scheduleHour;
+      const isWithinBuffer = currentMinute < 5;
       
-      // Check if the scheduled time is within the next 10 minutes (at medicine intake time)
-      return scheduleTime >= now && scheduleTime <= tenMinutesLater;
+      if (isCorrectHour && isWithinBuffer) {
+        console.log(`✓ Scheduling reminder for ${schedule.medicine_name} (${schedule.time_slot} at ${scheduleHour}:00)`);
+        return true;
+      }
+      
+      return false;
     });
 
     console.log(`Found ${upcomingSchedules?.length || 0} schedules needing notifications`);

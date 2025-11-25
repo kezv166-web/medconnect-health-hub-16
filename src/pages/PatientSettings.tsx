@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { PushSubscriptionStatus } from "@/components/notifications/PushSubscriptionStatus";
 
 const PatientSettings = () => {
   const { toast } = useToast();
@@ -133,6 +134,8 @@ const PatientSettings = () => {
               onCheckedChange={handleTogglePushNotifications}
             />
           </div>
+
+          {pushNotificationsEnabled && <PushSubscriptionStatus />}
 
           <div className="flex items-center justify-between">
             <div className="space-y-1 flex-1">
